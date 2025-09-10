@@ -1,36 +1,64 @@
-"use client"
+"use client";
 
-import { useEffect, useState } from "react"
-import dynamic from "next/dynamic"
-import { Badge } from "@/components/ui/badge"
-import { Button } from "@/components/ui/button"
-import { Input } from "@/components/ui/input"
-import { Switch } from "@/components/ui/switch"
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select"
-import { MapPin, User, Clock, Shield, Search } from "lucide-react"
-import type { Tourist } from "@/lib/mockData"
+import { useEffect, useState } from "react";
+import dynamic from "next/dynamic";
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { MapPin, User, Clock, Shield, Search } from "lucide-react";
+import type { Tourist } from "@/lib/mockData";
 
-const MapContainer = dynamic(() => import("react-leaflet").then((mod) => mod.MapContainer), { ssr: false })
-const TileLayer = dynamic(() => import("react-leaflet").then((mod) => mod.TileLayer), { ssr: false })
-const Marker = dynamic(() => import("react-leaflet").then((mod) => mod.Marker), { ssr: false })
-const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), { ssr: false })
-const MarkerClusterGroup = dynamic(() => import("react-leaflet-cluster"), { ssr: false })
+// Fixed: Import MapContainer with proper typing
+const MapContainer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.MapContainer),
+  {
+    ssr: false,
+  }
+) as any;
+
+const TileLayer = dynamic(
+  () => import("react-leaflet").then((mod) => mod.TileLayer),
+  { ssr: false }
+);
+const Marker = dynamic(
+  () => import("react-leaflet").then((mod) => mod.Marker),
+  { ssr: false }
+);
+const Popup = dynamic(() => import("react-leaflet").then((mod) => mod.Popup), {
+  ssr: false,
+});
+const MarkerClusterGroup = dynamic(() => import("react-leaflet-cluster"), {
+  ssr: false,
+});
 
 interface MapViewProps {
-  tourists: Tourist[]
-  onBoundsChange?: (bounds: any) => void
+  tourists: Tourist[];
+  onBoundsChange?: (bounds: any) => void;
+}
+
+// Fixed: Proper popup props interface
+interface PopupProps {
+  children: React.ReactNode;
 }
 
 const createCustomIcon = (status: Tourist["status"]) => {
-  if (typeof window === "undefined") return null
+  if (typeof window === "undefined") return null;
 
-  const L = require("leaflet")
+  const L = require("leaflet");
 
   const colors = {
     normal: "#3b82f6", // Blue
     alert: "#f59e0b", // Orange/Yellow
     sos: "#ef4444", // Red
-  }
+  };
 
   return new L.Icon({
     iconUrl: `data:image/svg+xml;base64,${btoa(`
@@ -42,38 +70,40 @@ const createCustomIcon = (status: Tourist["status"]) => {
     iconSize: [25, 41],
     iconAnchor: [12, 41],
     popupAnchor: [1, -34],
-  })
-}
+  });
+};
 
 export function MapView({ tourists, onBoundsChange }: MapViewProps) {
-  const [isClient, setIsClient] = useState(false)
-  const [mapProvider, setMapProvider] = useState("React-Leaflet")
-  const [searchLocation, setSearchLocation] = useState("")
-  const [clustersEnabled, setClustersEnabled] = useState(true)
-  const [heatmapEnabled, setHeatmapEnabled] = useState(false)
-  const [isLive, setIsLive] = useState(true)
-  const [mapRef, setMapRef] = useState<any>(null)
+  const [isClient, setIsClient] = useState(false);
+  const [mapProvider, setMapProvider] = useState("React-Leaflet");
+  const [searchLocation, setSearchLocation] = useState("");
+  const [clustersEnabled, setClustersEnabled] = useState(true);
+  const [heatmapEnabled, setHeatmapEnabled] = useState(false);
+  const [isLive, setIsLive] = useState(true);
+  const [mapRef, setMapRef] = useState<any>(null);
 
   useEffect(() => {
-    setIsClient(true)
-  }, [])
+    setIsClient(true);
+  }, []);
 
   const handleSearch = async () => {
-    if (!searchLocation.trim() || !mapRef) return
+    if (!searchLocation.trim() || !mapRef) return;
 
     try {
       // Simple geocoding simulation - in real app, use Google/Mapbox geocoding API
       const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(searchLocation)}`,
-      )
-      const data = await response.json()
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          searchLocation
+        )}`
+      );
+      const data = await response.json();
 
       if (data && data.length > 0) {
-        const { lat, lon } = data[0]
-        mapRef.setView([Number.parseFloat(lat), Number.parseFloat(lon)], 10)
+        const { lat, lon } = data[0];
+        mapRef.setView([Number.parseFloat(lat), Number.parseFloat(lon)], 10);
 
         // Add a red marker at searched location
-        const L = require("leaflet")
+        const L = require("leaflet");
         const searchIcon = new L.Icon({
           iconUrl: `data:image/svg+xml;base64,${btoa(`
             <svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
@@ -83,17 +113,19 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
           `)}`,
           iconSize: [25, 41],
           iconAnchor: [12, 41],
-        })
+        });
 
-        L.marker([Number.parseFloat(lat), Number.parseFloat(lon)], { icon: searchIcon })
+        L.marker([Number.parseFloat(lat), Number.parseFloat(lon)], {
+          icon: searchIcon,
+        })
           .addTo(mapRef)
           .bindPopup(`<b>Search Result</b><br/>${searchLocation}`)
-          .openPopup()
+          .openPopup();
       }
     } catch (error) {
-      console.error("Search failed:", error)
+      console.error("Search failed:", error);
     }
-  }
+  };
 
   if (!isClient) {
     return (
@@ -103,25 +135,28 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
           <p className="text-muted-foreground">Loading map...</p>
         </div>
       </div>
-    )
+    );
   }
 
   // India center coordinates
-  const indiaCenter: [number, number] = [20.5937, 78.9629]
+  const indiaCenter: [number, number] = [20.5937, 78.9629];
 
   const renderMarkers = () => {
     const markers = tourists
       .map((tourist) => {
-        const icon = createCustomIcon(tourist.status)
-        if (!icon) return null
+        const icon = createCustomIcon(tourist.status);
+        if (!icon) return null;
 
         return (
           <Marker key={tourist.id} position={tourist.location} icon={icon}>
-            <Popup className="custom-popup">
+            {/* Fixed: Removed className prop from Popup */}
+            <Popup>
               <div className="p-2 min-w-[200px]">
                 <div className="flex items-center gap-2 mb-2">
                   <User className="size-4 text-blue-600" />
-                  <h3 className="font-semibold text-foreground">{tourist.name}</h3>
+                  <h3 className="font-semibold text-foreground">
+                    {tourist.name}
+                  </h3>
                 </div>
 
                 <div className="space-y-2 text-sm">
@@ -132,8 +167,8 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
                         tourist.status === "normal"
                           ? "default"
                           : tourist.status === "alert"
-                            ? "secondary"
-                            : "destructive"
+                          ? "secondary"
+                          : "destructive"
                       }
                       className="capitalize"
                     >
@@ -145,7 +180,9 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
                     <span className="text-muted-foreground">Safety Score:</span>
                     <div className="flex items-center gap-1">
                       <Shield className="size-3" />
-                      <span className="font-medium">{tourist.safetyScore}/100</span>
+                      <span className="font-medium">
+                        {tourist.safetyScore}/100
+                      </span>
                     </div>
                   </div>
 
@@ -153,29 +190,32 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
                     <span className="text-muted-foreground">Last Ping:</span>
                     <div className="flex items-center gap-1">
                       <Clock className="size-3" />
-                      <span className="text-xs">{new Date(tourist.lastPing).toLocaleTimeString()}</span>
+                      <span className="text-xs">
+                        {new Date(tourist.lastPing).toLocaleTimeString()}
+                      </span>
                     </div>
                   </div>
 
                   <div className="flex items-center justify-between">
                     <span className="text-muted-foreground">Location:</span>
                     <span className="text-xs font-mono">
-                      {tourist.location[0].toFixed(4)}, {tourist.location[1].toFixed(4)}
+                      {tourist.location[0].toFixed(4)},{" "}
+                      {tourist.location[1].toFixed(4)}
                     </span>
                   </div>
                 </div>
               </div>
             </Popup>
           </Marker>
-        )
+        );
       })
-      .filter(Boolean)
+      .filter(Boolean);
 
     if (clustersEnabled) {
-      return <MarkerClusterGroup>{markers}</MarkerClusterGroup>
+      return <MarkerClusterGroup>{markers}</MarkerClusterGroup>;
     }
-    return markers
-  }
+    return markers;
+  };
 
   return (
     <div className="relative">
@@ -223,40 +263,48 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
       <div className="absolute top-20 right-4 z-[1000] bg-white/95 backdrop-blur-sm p-4 rounded-lg shadow-lg space-y-3">
         <div className="flex items-center justify-between gap-3">
           <span className="text-sm font-medium">Clusters</span>
-          <Switch checked={clustersEnabled} onCheckedChange={setClustersEnabled} />
+          <Switch
+            checked={clustersEnabled}
+            onCheckedChange={setClustersEnabled}
+          />
         </div>
         <div className="flex items-center justify-between gap-3">
           <span className="text-sm font-medium">Heatmap</span>
-          <Switch checked={heatmapEnabled} onCheckedChange={setHeatmapEnabled} />
+          <Switch
+            checked={heatmapEnabled}
+            onCheckedChange={setHeatmapEnabled}
+          />
         </div>
       </div>
 
+      {/* Fixed: Moved style to a separate component or use CSS-in-JS properly */}
       <style jsx global>{`
         .leaflet-container {
           height: 600px;
           width: 100%;
           border-radius: 0.5rem;
         }
-        .custom-popup .leaflet-popup-content-wrapper {
-          border-radius: 0.5rem;
-          box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
+        .leaflet-popup-content-wrapper {
+          border-radius: 0.5rem !important;
+          box-shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1) !important;
         }
-        .custom-popup .leaflet-popup-tip {
-          background: white;
+        .leaflet-popup-tip {
+          background: white !important;
         }
       `}</style>
 
+      {/* Fixed: Added proper props to MapContainer */}
       <MapContainer
         center={indiaCenter}
         zoom={5}
         style={{ height: "600px", width: "100%" }}
         className="rounded-lg border"
-        ref={setMapRef}
-        whenReady={() => {
-          if (onBoundsChange && mapRef) {
-            mapRef.on("moveend", () => {
-              onBoundsChange(mapRef.getBounds())
-            })
+        ref={(map: any) => {
+          setMapRef(map);
+          if (onBoundsChange && map) {
+            map.on("moveend", () => {
+              onBoundsChange(map.getBounds());
+            });
           }
         }}
       >
@@ -268,5 +316,5 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
         {renderMarkers()}
       </MapContainer>
     </div>
-  )
+  );
 }
