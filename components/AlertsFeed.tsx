@@ -1,19 +1,31 @@
-"use client"
+"use client";
 
-import { AlertTriangle, MapPin, Clock, User } from "lucide-react"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { alerts, getTouristById } from "@/lib/mockData"
+import { useEffect, useState } from "react";
+import { AlertTriangle, MapPin, Clock, User } from "lucide-react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { alerts, getTouristById } from "@/lib/mockData";
 
 const alertTypeColors = {
   "Restricted Area": "bg-red-100 text-red-800 border-red-200",
   "Location Missing": "bg-orange-100 text-orange-800 border-orange-200",
   "Stationary > 1 Day": "bg-yellow-100 text-yellow-800 border-yellow-200",
   "Path Deviation": "bg-blue-100 text-blue-800 border-blue-200",
-}
+};
 
 export function AlertsFeed() {
-  const recentAlerts = alerts.slice(0, 5) // Show latest 5 alerts
+  const recentAlerts = alerts.slice(0, 5); // Show latest 5 alerts
+
+  // ✅ Store formatted times only after hydration
+  const [formattedTimes, setFormattedTimes] = useState<string[]>([]);
+
+  useEffect(() => {
+    setFormattedTimes(
+      alerts
+        .slice(0, 5)
+        .map((alert) => new Date(alert.timestamp).toLocaleTimeString())
+    );
+  }, []);
 
   return (
     <Card>
@@ -25,8 +37,8 @@ export function AlertsFeed() {
       </CardHeader>
       <CardContent>
         <div className="space-y-4">
-          {recentAlerts.map((alert) => {
-            const tourist = getTouristById(alert.touristId)
+          {recentAlerts.map((alert, index) => {
+            const tourist = getTouristById(alert.touristId);
             return (
               <div
                 key={alert.id}
@@ -37,7 +49,10 @@ export function AlertsFeed() {
                 </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="outline" className={alertTypeColors[alert.type]}>
+                    <Badge
+                      variant="outline"
+                      className={alertTypeColors[alert.type]}
+                    >
                       {alert.type}
                     </Badge>
                   </div>
@@ -49,17 +64,20 @@ export function AlertsFeed() {
                     <div className="flex items-center gap-1">
                       <MapPin className="size-3" />
                       <span>
-                        {alert.location[0].toFixed(4)}, {alert.location[1].toFixed(4)}
+                        {alert.location[0].toFixed(4)},{" "}
+                        {alert.location[1].toFixed(4)}
                       </span>
                     </div>
                     <div className="flex items-center gap-1">
                       <Clock className="size-3" />
-                      <span>{new Date(alert.timestamp).toLocaleTimeString()}</span>
+                      {formattedTimes[index] && (
+                        <span>{formattedTimes[index]}</span>
+                      )}
                     </div>
                   </div>
                 </div>
               </div>
-            )
+            );
           })}
           {recentAlerts.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
@@ -70,5 +88,5 @@ export function AlertsFeed() {
         </div>
       </CardContent>
     </Card>
-  )
+  );
 }
