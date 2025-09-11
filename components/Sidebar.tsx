@@ -31,10 +31,10 @@ import { getDashboardStats } from "@/lib/mockData";
 const navigation = [
   { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { name: "Map", href: "/dashboard/map", icon: Map },
-  { name: "Reports", href: "/dashboard/reports", icon: FileText },
+  { name: "Alerts", href: "/dashboard/reports", icon: FileText },
   { name: "Enquire", href: "/dashboard/enquire", icon: Search },
   {
-    name: "Admin Alerts",
+    name: "Send Alerts",
     href: "/dashboard/alerts",
     icon: AlertTriangle,
   },
