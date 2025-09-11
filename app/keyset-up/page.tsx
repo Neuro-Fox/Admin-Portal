@@ -5,10 +5,17 @@ import { useRouter } from "next/navigation";
 import { savePrivateKey, unlockPrivateKey } from "../../components/ether";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, Key, Lock, Shield } from "lucide-react";
+import Image from "next/image";
 
 export default function KeySetupPage() {
   const [mode, setMode] = useState<"new" | "unlock">("new");
@@ -45,43 +52,49 @@ export default function KeySetupPage() {
 
   const handleNewKey = async () => {
     setError("");
-    
+
     // Validation
     if (!privateKey.trim()) {
       setError("Please enter your private key");
       return;
     }
-    
+
     if (!validatePrivateKey(privateKey)) {
-      setError("Invalid private key format. Please enter a valid Ethereum private key.");
+      setError(
+        "Invalid private key format. Please enter a valid Ethereum private key."
+      );
       return;
     }
-    
+
     if (!password.trim()) {
       setError("Please enter a password");
       return;
     }
-    
+
     if (password.length < 6) {
       setError("Password must be at least 6 characters long");
       return;
     }
-    
+
     if (password !== confirmPassword) {
       setError("Passwords do not match");
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       // Ensure private key has 0x prefix
-      const formattedKey = privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`;
+      const formattedKey = privateKey.startsWith("0x")
+        ? privateKey
+        : `0x${privateKey}`;
       savePrivateKey(formattedKey, password);
       sessionStorage.setItem("AUTHENTICATED", "true");
       router.push("/dashboard");
     } catch (err) {
-      setError("Error saving key. Please check your private key and try again.");
+      setError(
+        "Error saving key. Please check your private key and try again."
+      );
       console.error("Key save error:", err);
     } finally {
       setIsLoading(false);
@@ -90,14 +103,14 @@ export default function KeySetupPage() {
 
   const handleUnlock = async () => {
     setError("");
-    
+
     if (!password.trim()) {
       setError("Please enter your password");
       return;
     }
 
     setIsLoading(true);
-    
+
     try {
       unlockPrivateKey(password);
       sessionStorage.setItem("AUTHENTICATED", "true");
@@ -123,20 +136,25 @@ export default function KeySetupPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mb-4">
-            <Shield className="w-6 h-6 text-white" />
+          <div className=" justify-center items-center mb-4">
+            <Image
+              src="/logo.jpg"
+              alt="Logo"
+              width={70}
+              height={70}
+              className="object-contain"
+            />
           </div>
           <CardTitle className="text-2xl font-bold">
             {mode === "new" ? "Setup Your Key" : "Unlock Dashboard"}
           </CardTitle>
           <CardDescription>
-            {mode === "new" 
+            {mode === "new"
               ? "Enter your private key and create a secure password to access the dashboard"
-              : "Enter your password to unlock the dashboard"
-            }
+              : "Enter your password to unlock the dashboard"}
           </CardDescription>
         </CardHeader>
-        
+
         <CardContent className="space-y-4">
           {error && (
             <Alert variant="destructive">
@@ -165,7 +183,11 @@ export default function KeySetupPage() {
                     className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPrivateKey(!showPrivateKey)}
                   >
-                    {showPrivateKey ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPrivateKey ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
@@ -189,7 +211,11 @@ export default function KeySetupPage() {
                     className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
@@ -206,9 +232,9 @@ export default function KeySetupPage() {
                 />
               </div>
 
-              <Button 
-                onClick={handleNewKey} 
-                className="w-full" 
+              <Button
+                onClick={handleNewKey}
+                className="w-full"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -255,14 +281,18 @@ export default function KeySetupPage() {
                     className="absolute right-0 top-0 h-full px-3 hover:bg-transparent"
                     onClick={() => setShowPassword(!showPassword)}
                   >
-                    {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                    {showPassword ? (
+                      <EyeOff className="h-4 w-4" />
+                    ) : (
+                      <Eye className="h-4 w-4" />
+                    )}
                   </Button>
                 </div>
               </div>
 
-              <Button 
-                onClick={handleUnlock} 
-                className="w-full" 
+              <Button
+                onClick={handleUnlock}
+                className="w-full"
                 disabled={isLoading}
               >
                 {isLoading ? (
@@ -296,8 +326,9 @@ export default function KeySetupPage() {
 
           <div className="mt-6 p-4 bg-blue-50 rounded-lg">
             <p className="text-xs text-blue-700">
-              <strong>Security Note:</strong> Your private key is encrypted and stored locally in your browser. 
-              We never send your keys to any server.
+              <strong>Security Note:</strong> Your private key is encrypted and
+              stored locally in your browser. We never send your keys to any
+              server.
             </p>
           </div>
         </CardContent>

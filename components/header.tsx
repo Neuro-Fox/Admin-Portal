@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import React from "react";
 import { useScroll, motion } from "motion/react";
 import { cn } from "@/lib/utils";
+import Image from "next/image";
 
 const menuItems = [
   { name: "Features", href: "#link" },
@@ -51,6 +52,13 @@ export const HeroHeader = () => {
                 aria-label="home"
                 className="flex items-center space-x-2"
               >
+                <Image
+                  src="/logo.png"
+                  alt="Logo"
+                  width={40}
+                  height={40}
+                  className="object-contain"
+                />
                 <span
                   className={cn(
                     "text-2xl font-bold transition-colors duration-300",
@@ -118,8 +126,8 @@ export const HeroHeader = () => {
               </div>
               <div className="flex w-full flex-col space-y-3 sm:flex-row sm:gap-3 sm:space-y-0 md:w-fit">
                 <Button asChild variant="outline" size="sm">
-                  <Link href="#">
-                    <span>Login</span>
+                  <Link href="/keyset-up">
+                    <span>Register</span>
                   </Link>
                 </Button>
               </div>
