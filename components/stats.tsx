@@ -4,15 +4,15 @@ export default function StatsSection() {
   return (
     <section
       id="stats"
-      className="py-24 bg-gradient-to-b from-gray-700 to-gray-900 text-white"
+      className="py-24 bg-gradient-to-b from-gray-950 to-gray-950 text-white"
     >
       <div className="mx-auto max-w-7xl px-6">
         {/* Section Header */}
         <div className="text-center mb-20">
-          <h2 className="text-4xl md:text-5xl font-semibold text-gray-900 mb-6">
+          <h2 className="text-4xl md:text-6xl font-bold bg-gradient-to-r from-blue-400 via-cyan-300 to-purple-400 bg-clip-text text-transparent">
             NeuroFox in Numbers
           </h2>
-          <p className="text-xl text-gray-600 max-w-3xl mx-auto leading-relaxed">
+          <p className="text-xl text-gray-200 max-w-3xl mx-auto leading-relaxed">
             Our advanced tourist safety platform delivers measurable results
             with cutting-edge technology, real-time monitoring, and instant
             emergency response capabilities.
@@ -24,15 +24,15 @@ export default function StatsSection() {
           {/* Tourists Monitored */}
           <div className="text-center">
             <div className="mx-auto w-16 h-16 bg-blue-100 rounded-2xl flex items-center justify-center mb-6">
-              <Users className="h-8 w-8 text-blue-600" />
+              <Users className="h-8 w-8 text-blue-500" />
             </div>
-            <div className="text-5xl md:text-6xl font-bold text-gray-900 mb-3">
+            <div className="text-5xl md:text-6xl font-bold text-gray-50 mb-3">
               50K+
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-gray-50 mb-2">
               Tourists Monitored
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-50">
               Active users protected daily across India
             </p>
           </div>
@@ -42,13 +42,13 @@ export default function StatsSection() {
             <div className="mx-auto w-16 h-16 bg-purple-100 rounded-2xl flex items-center justify-center mb-6">
               <Zap className="h-8 w-8 text-purple-600" />
             </div>
-            <div className="text-5xl md:text-6xl font-bold text-gray-900 mb-3">
-              &lt;15s
+            <div className="text-5xl md:text-6xl font-bold text-gray-50 mb-3">
+              15s
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-gray-50 mb-2">
               Emergency Response
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-50">
               Average alert processing and dispatch time
             </p>
           </div>
@@ -56,15 +56,15 @@ export default function StatsSection() {
           {/* Coverage Areas */}
           <div className="text-center">
             <div className="mx-auto w-16 h-16 bg-green-100 rounded-2xl flex items-center justify-center mb-6">
-              <MapPin className="h-8 w-8 text-green-600" />
+              <MapPin className="h-8 w-8 text-green-500" />
             </div>
-            <div className="text-5xl md:text-6xl font-bold text-gray-900 mb-3">
+            <div className="text-5xl md:text-6xl font-bold text-gray-50 mb-3">
               28
             </div>
-            <h3 className="text-lg font-semibold text-gray-900 mb-2">
+            <h3 className="text-lg font-semibold text-gray-50 mb-2">
               States Covered
             </h3>
-            <p className="text-gray-600">
+            <p className="text-gray-300">
               Complete pan-India monitoring network
             </p>
           </div>
@@ -85,7 +85,7 @@ export default function StatsSection() {
               <Clock className="h-8 w-8 text-purple-400" />
             </div>
             <div className="text-3xl font-bold text-white mb-2">24/7</div>
-            <p className="text-gray-400 font-medium">AI Monitoring</p>
+            <p className="text-gray-50 font-medium">AI Monitoring</p>
           </div>
 
           <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 text-center hover:border-gray-600/50 transition-all backdrop-blur-sm">
@@ -93,7 +93,7 @@ export default function StatsSection() {
               <AlertTriangle className="h-8 w-8 text-orange-400" />
             </div>
             <div className="text-3xl font-bold text-white mb-2">1,500+</div>
-            <p className="text-gray-400 font-medium">Incidents Prevented</p>
+            <p className="text-gray-50 font-medium">Incidents Prevented</p>
           </div>
 
           <div className="bg-gray-800/50 border border-gray-700/50 rounded-xl p-6 text-center hover:border-gray-600/50 transition-all backdrop-blur-sm">
@@ -101,7 +101,7 @@ export default function StatsSection() {
               <Users className="h-8 w-8 text-green-400" />
             </div>
             <div className="text-3xl font-bold text-white mb-2">200+</div>
-            <p className="text-gray-400 font-medium">Police Partnerships</p>
+            <p className="text-gray-50 font-medium">Police Partnerships</p>
           </div>
         </div>
 

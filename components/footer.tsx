@@ -1,5 +1,6 @@
 import { Shield, Mail, Phone, MapPin, ExternalLink } from "lucide-react";
 import Link from "next/link";
+import Image from "next/image";
 
 const navigationLinks = [
   {
@@ -96,9 +97,14 @@ export default function FooterSection() {
                 aria-label="Fox Security Home"
                 className="flex items-center space-x-3 group w-fit"
               >
-                <div className="flex items-center justify-center w-12 h-12 bg-gradient-to-br from-blue-600 to-cyan-600 rounded-xl group-hover:shadow-lg group-hover:shadow-blue-500/25 transition-all duration-300">
-                  <Shield className="h-7 w-7 text-white" />
-                </div>
+                <Image
+                  src="/logo.png"
+                  alt="Logo"
+                  width={28}
+                  height={28}
+                  className="object-contain"
+                />
+
                 <div className="flex flex-col">
                   <span className="text-2xl font-bold text-white">
                     Fox Security
