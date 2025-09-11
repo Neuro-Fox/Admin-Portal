@@ -18,22 +18,53 @@ import { motion, AnimatePresence, Variants } from "framer-motion";
 
 const mobileImages = [
   {
-    src: "/img1.jpg",
-    alt: "Tourist Registration & Digital ID",
-    title: "Secure Registration",
-    description: "Blockchain-secured digital tourist ID with KYC verification",
+    src: "/mobile/img1.jpg",
+    alt: "Sign in with private key and wallet",
+    title: "Secure Wallet Login",
+    description:
+      "Sign transactions with your private key and connect seamlessly to your digital wallet.",
   },
   {
-    src: "/img2.jpg",
-    alt: "Real-time Location Tracking",
-    title: "Live Tracking",
-    description: "GPS monitoring with geo-fencing and safe zone alerts",
+    src: "/mobile/img2.jpg",
+    alt: "Update personal information",
+    title: "Personal Info Update",
+    description:
+      "Easily update and manage your personal details in a secure environment.",
   },
   {
-    src: "/img3.jpg",
-    alt: "Emergency SOS Features",
-    title: "Emergency Response",
-    description: "One-tap SOS with instant location sharing to authorities",
+    src: "/mobile/img3.jpg",
+    alt: "Home page showing location and AI safety score",
+    title: "Smart Safety Dashboard",
+    description:
+      "View your current location with AI-generated safety scores and toggle safety monitoring on or off.",
+  },
+  {
+    src: "/mobile/img4.jpg",
+    alt: "Map showing restricted and incident-prone areas",
+    title: "Risk Zone Map",
+    description:
+      "Interactive map highlighting restricted and incident-prone areas to help you navigate safely.",
+  },
+  {
+    src: "/mobile/img5.jpg",
+    alt: "Alert notification when entering restricted areas",
+    title: "Smart Safety Alerts",
+    description:
+      "Receive instant alerts when entering restricted or high-risk zones.",
+  },
+  {
+    src: "/mobile/img6.jpg",
+    alt: "User-friendly itinerary planning UI",
+    title: "Itinerary Planner",
+    description:
+      "Plan your trip effortlessly with a user-friendly itinerary builder and smart recommendations.",
+  },
+  {
+    src: "/mobile/img7.jpg",
+    alt: "Profile settings interface",
+    title: "Profile Settings",
+    description:
+      "Customize and update your profile settings to keep your information up to date.",
   },
 ];
 
