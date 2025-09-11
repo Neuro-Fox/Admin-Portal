@@ -4,7 +4,7 @@ export default function StatsSection() {
   return (
     <section
       id="stats"
-      className="py-24 bg-gradient-to-b from-gray-50 to-white"
+      className="py-24 bg-gradient-to-b from-gray-700 to-gray-900 text-white"
     >
       <div className="mx-auto max-w-7xl px-6">
         {/* Section Header */}

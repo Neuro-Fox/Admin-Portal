@@ -146,9 +146,11 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
       .map((tourist) => {
         const icon = createCustomIcon(tourist.status);
         if (!icon) return null;
+        
+        const MarkerComponent = Marker as any;
 
         return (
-          <Marker key={tourist.id} position={tourist.location} icon={icon}>
+          <MarkerComponent key={tourist.id} position={tourist.location} icon={icon}>
             {/* Fixed: Removed className prop from Popup */}
             <Popup>
               <div className="p-2 min-w-[200px]">
@@ -206,7 +208,7 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
                 </div>
               </div>
             </Popup>
-          </Marker>
+          </MarkerComponent>
         );
       })
       .filter(Boolean);
@@ -309,8 +311,10 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
         }}
       >
         <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          {...({
+            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          } as any)}
         />
 
         {renderMarkers()}
