@@ -14,7 +14,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { MapPin, User, Clock, Shield, Search, X } from "lucide-react";
-import type { Tourist } from "@/lib/mockData";
+import type { MonitoredTourist } from "@/lib/mockData";
 
 // Fixed: Import MapContainer with proper typing
 const MapContainer = dynamic(
@@ -40,7 +40,7 @@ const MarkerClusterGroup = dynamic(() => import("react-leaflet-cluster"), {
 });
 
 interface MapViewProps {
-  tourists: Tourist[];
+  tourists: MonitoredTourist[];
   onBoundsChange?: (bounds: any) => void;
 }
 
@@ -49,7 +49,7 @@ interface PopupProps {
   children: React.ReactNode;
 }
 
-const createCustomIcon = (status: Tourist["status"]) => {
+const createCustomIcon = (status: MonitoredTourist["status"]) => {
   if (typeof window === "undefined") return null;
 
   const L = require("leaflet");
@@ -86,21 +86,21 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
 
   // Predefined locations for fallback search
   const predefinedLocations = {
-    'delhi': { lat: 28.6139, lng: 77.209, name: 'New Delhi' },
-    'mumbai': { lat: 19.076, lng: 72.8777, name: 'Mumbai' },
-    'bangalore': { lat: 12.9716, lng: 77.5946, name: 'Bangalore' },
-    'bengaluru': { lat: 12.9716, lng: 77.5946, name: 'Bengaluru' },
-    'kolkata': { lat: 22.5726, lng: 88.3639, name: 'Kolkata' },
-    'chennai': { lat: 13.0827, lng: 80.2707, name: 'Chennai' },
-    'jaipur': { lat: 26.9124, lng: 75.7873, name: 'Jaipur' },
-    'goa': { lat: 15.2993, lng: 74.124, name: 'Goa' },
-    'agra': { lat: 27.1767, lng: 78.0081, name: 'Agra' },
-    'kerala': { lat: 10.8505, lng: 76.2711, name: 'Kerala' },
-    'rajasthan': { lat: 27.0238, lng: 74.2179, name: 'Rajasthan' },
-    'hyderabad': { lat: 17.385, lng: 78.4867, name: 'Hyderabad' },
-    'pune': { lat: 18.5204, lng: 73.8567, name: 'Pune' },
-    'ahmedabad': { lat: 23.0225, lng: 72.5714, name: 'Ahmedabad' },
-    'lucknow': { lat: 26.8467, lng: 80.9462, name: 'Lucknow' }
+    delhi: { lat: 28.6139, lng: 77.209, name: "New Delhi" },
+    mumbai: { lat: 19.076, lng: 72.8777, name: "Mumbai" },
+    bangalore: { lat: 12.9716, lng: 77.5946, name: "Bangalore" },
+    bengaluru: { lat: 12.9716, lng: 77.5946, name: "Bengaluru" },
+    kolkata: { lat: 22.5726, lng: 88.3639, name: "Kolkata" },
+    chennai: { lat: 13.0827, lng: 80.2707, name: "Chennai" },
+    jaipur: { lat: 26.9124, lng: 75.7873, name: "Jaipur" },
+    goa: { lat: 15.2993, lng: 74.124, name: "Goa" },
+    agra: { lat: 27.1767, lng: 78.0081, name: "Agra" },
+    kerala: { lat: 10.8505, lng: 76.2711, name: "Kerala" },
+    rajasthan: { lat: 27.0238, lng: 74.2179, name: "Rajasthan" },
+    hyderabad: { lat: 17.385, lng: 78.4867, name: "Hyderabad" },
+    pune: { lat: 18.5204, lng: 73.8567, name: "Pune" },
+    ahmedabad: { lat: 23.0225, lng: 72.5714, name: "Ahmedabad" },
+    lucknow: { lat: 26.8467, lng: 80.9462, name: "Lucknow" },
   };
 
   useEffect(() => {
@@ -126,13 +126,16 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
       // Check if it's a predefined location first
       const searchKey = searchLocation.toLowerCase().trim();
       if (predefinedLocations[searchKey as keyof typeof predefinedLocations]) {
-        const location = predefinedLocations[searchKey as keyof typeof predefinedLocations];
+        const location =
+          predefinedLocations[searchKey as keyof typeof predefinedLocations];
         latitude = location.lat;
         longitude = location.lng;
         displayName = location.name;
       } else {
         // Try to parse as coordinates (lat,lng)
-        const coordMatch = searchLocation.match(/^(-?\d+\.?\d*),\s*(-?\d+\.?\d*)$/);
+        const coordMatch = searchLocation.match(
+          /^(-?\d+\.?\d*),\s*(-?\d+\.?\d*)$/
+        );
         if (coordMatch) {
           latitude = Number.parseFloat(coordMatch[1]);
           longitude = Number.parseFloat(coordMatch[2]);
@@ -160,14 +163,17 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
           } catch {
             // If all else fails, provide helpful error
             const suggestions = Object.keys(predefinedLocations)
-              .filter(city => city.includes(searchKey.substring(0, 3)))
+              .filter((city) => city.includes(searchKey.substring(0, 3)))
               .slice(0, 3);
-            
-            const suggestionText = suggestions.length > 0 
-              ? ` Try: ${suggestions.join(', ')}` 
-              : ' Try cities like: Delhi, Mumbai, Bangalore';
-            
-            throw new Error(`Location not found.${suggestionText} or use coordinates (lat,lng)`);
+
+            const suggestionText =
+              suggestions.length > 0
+                ? ` Try: ${suggestions.join(", ")}`
+                : " Try cities like: Delhi, Mumbai, Bangalore";
+
+            throw new Error(
+              `Location not found.${suggestionText} or use coordinates (lat,lng)`
+            );
           }
         }
       }
@@ -201,7 +207,11 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
       setSearchMarker(marker);
     } catch (error) {
       console.error("Search failed:", error);
-      setSearchError(error instanceof Error ? error.message : "Search failed. Try using coordinates (lat,lng)");
+      setSearchError(
+        error instanceof Error
+          ? error.message
+          : "Search failed. Try using coordinates (lat,lng)"
+      );
     }
   };
 
@@ -233,11 +243,15 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
       .map((tourist) => {
         const icon = createCustomIcon(tourist.status);
         if (!icon) return null;
-        
+
         const MarkerComponent = Marker as any;
 
         return (
-          <MarkerComponent key={tourist.id} position={tourist.location} icon={icon}>
+          <MarkerComponent
+            key={tourist.id}
+            position={tourist.location}
+            icon={icon}
+          >
             {/* Fixed: Removed className prop from Popup */}
             <Popup>
               <div className="p-2 min-w-[200px]">
@@ -336,7 +350,11 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
                 onKeyPress={(e) => e.key === "Enter" && handleSearch()}
                 className="flex-1"
               />
-              <Button size="sm" onClick={handleSearch} disabled={!searchLocation.trim()}>
+              <Button
+                size="sm"
+                onClick={handleSearch}
+                disabled={!searchLocation.trim()}
+              >
                 <Search className="size-4" />
               </Button>
               {(searchLocation || searchMarker) && (
@@ -416,8 +434,9 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
       >
         <TileLayer
           {...({
-            attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
-            url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+            attribution:
+              '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',
+            url: "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
           } as any)}
         />
 
