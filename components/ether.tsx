@@ -3,18 +3,18 @@ import CryptoJS from "crypto-js";
 import CONTRACT_ABI from "../constant/ABI.json";
 
 const RPC_URL = "https://sepolia.infura.io/v3/3ca08f13b2f94d4aa806fead92888aa8";
-const CONTRACT_ADDRESS = "0x9D7f74d0C41E726EC95884E0e97Fa6129e3b5E99";
+const CONTRACT_ADDRESS = "0xA18fc87e627D90C470cb6C155f5da0964A1370F6";
 
 let contractWithSigner: ethers.Contract | null = null;
 
 export const savePrivateKey = (privateKey: string, password: string): void => {
   const encrypted = CryptoJS.AES.encrypt(privateKey, password).toString();
-  sessionStorage.setItem("ENCRYPTED_OWNER_KEY", encrypted);
+  localStorage.setItem("ENCRYPTED_OWNER_KEY", encrypted);
   connectWithPrivateKey(privateKey);
 };
 
 export const unlockPrivateKey = (password: string): void => {
-  const encrypted = sessionStorage.getItem("ENCRYPTED_OWNER_KEY");
+  const encrypted = localStorage.getItem("ENCRYPTED_OWNER_KEY");
   if (!encrypted) throw new Error("No key stored");
   const bytes = CryptoJS.AES.decrypt(encrypted, password);
   const key = bytes.toString(CryptoJS.enc.Utf8);
@@ -30,7 +30,7 @@ export const connectWithPrivateKey = (privateKey: string): void => {
 
 export const getContract = () => {
   if (contractWithSigner) return contractWithSigner;
-  const encrypted = sessionStorage.getItem("ENCRYPTED_OWNER_KEY");
+  const encrypted = localStorage.getItem("ENCRYPTED_OWNER_KEY");
   if (!encrypted) throw new Error("Owner key not set");
   throw new Error("Password required to unlock key");
 };
