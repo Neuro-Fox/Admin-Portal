@@ -32,6 +32,11 @@ const navigation = [
   { name: "Map", href: "/dashboard/map", icon: Map },
   { name: "Reports", href: "/dashboard/reports", icon: FileText },
   { name: "Enquire", href: "/dashboard/enquire", icon: Search },
+  {
+    name: "Admin Alerts",
+    href: "/dashboard/alerts",
+    icon: AlertTriangle,
+  },
   { name: "Settings", href: "/dashboard/settings", icon: Settings },
 ];
 

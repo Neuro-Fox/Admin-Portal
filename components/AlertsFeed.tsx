@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import { AlertTriangle, MapPin, Clock, User } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { alerts, getTouristById } from "@/lib/mockData";
+import { policeAlerts as alerts, getTouristById } from "@/lib/mockData";
 
 const alertTypeColors = {
   "Restricted Area": "bg-red-100 text-red-800 border-red-200",

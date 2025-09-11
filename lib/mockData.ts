@@ -1,54 +1,148 @@
-// Centralized mock data for Police Monitoring Dashboard
+// Combined mock data for Tourism Safety and Police Monitoring Dashboard
 
+// Existing interfaces
 export interface Tourist {
-  id: string
-  name: string
-  location: [number, number] // [lat, lng]
-  lastPing: string
-  safetyScore: number
-  status: "normal" | "alert" | "sos"
+  id: string;
+  latitude: number;
+  longitude: number;
+  safetyScore: number;
+  timestamp: string;
+}
+
+export interface UserLocation {
+  latitude: number;
+  longitude: number;
+  timestamp: string;
 }
 
 export interface Alert {
-  id: string
-  type: "Restricted Area" | "Location Missing" | "Stationary > 1 Day" | "Path Deviation"
-  timestamp: string
-  location: [number, number]
-  touristId: string
+  id: string;
+  title: string;
+  type: "Warning" | "Advisory" | "Emergency";
+  message: string;
+  latitude: number;
+  longitude: number;
+  timestamp: string;
+  status: "active" | "sent" | "expired";
+}
+
+// New interfaces from Police Monitoring Dashboard
+export interface MonitoredTourist {
+  id: string;
+  name: string;
+  location: [number, number]; // [lat, lng]
+  lastPing: string;
+  safetyScore: number;
+  status: "normal" | "alert" | "sos";
+}
+
+export interface PoliceAlert {
+  id: string;
+  type:
+    | "Restricted Area"
+    | "Location Missing"
+    | "Stationary > 1 Day"
+    | "Path Deviation";
+  timestamp: string;
+  location: [number, number];
+  touristId: string;
 }
 
 export interface SOSReport {
-  id: string
-  touristId: string
-  status: "pending" | "resolved"
-  raisedAt: string
-  resolved?: string
+  id: string;
+  touristId: string;
+  status: "pending" | "resolved";
+  raisedAt: string;
+  resolved?: string;
 }
 
 export interface BlockchainUser {
-  id: string
-  touristId: string
+  id: string;
+  touristId: string;
   kycData: {
-    fullName: string
-    passportNumber: string
-    nationality: string
-    age: number
-  }
+    fullName: string;
+    passportNumber: string;
+    nationality: string;
+    age: number;
+  };
   itinerary: {
-    destination: string
-    checkIn: string
-    checkOut: string
-    purpose: string
-  }
+    destination: string;
+    checkIn: string;
+    checkOut: string;
+    purpose: string;
+  };
   emergencyContacts: {
-    name: string
-    relationship: string
-    phone: string
-  }[]
+    name: string;
+    relationship: string;
+    phone: string;
+  }[];
 }
 
-// Mock tourists data - spread across India
-export const tourists: Tourist[] = [
+// Mock tourist data generator (existing)
+export const generateMockTourists = (): Tourist[] => {
+  const tourists = [];
+  const baseLocations = [
+    { lat: 40.7128, lng: -74.006 }, // NYC
+    { lat: 40.7589, lng: -73.9851 }, // Times Square
+    { lat: 40.7505, lng: -73.9934 }, // Herald Square
+    { lat: 40.7614, lng: -73.9776 }, // Central Park
+    { lat: 40.7282, lng: -74.0776 }, // Battery Park
+  ];
+
+  for (let i = 0; i < 50; i++) {
+    const baseLocation =
+      baseLocations[Math.floor(Math.random() * baseLocations.length)];
+
+    tourists.push({
+      id: `tourist-${i + 1}`,
+      latitude: baseLocation.lat + (Math.random() - 0.5) * 0.02,
+      longitude: baseLocation.lng + (Math.random() - 0.5) * 0.02,
+      safetyScore: Math.floor(Math.random() * 10) + 1,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  return tourists;
+};
+
+// Mock user location generator (existing)
+export const generateMockUserLocation = (): UserLocation => {
+  return {
+    latitude: 40.7128 + (Math.random() - 0.5) * 0.001,
+    longitude: -74.006 + (Math.random() - 0.5) * 0.001,
+    timestamp: new Date().toISOString(),
+  };
+};
+
+// Mock alerts data (existing tourism alerts)
+export const alerts: Alert[] = [
+  {
+    id: "alert-1",
+    title: "Heavy Traffic Alert",
+    type: "Warning",
+    message:
+      "Heavy traffic reported in Times Square area. Consider alternative routes.",
+    latitude: 40.758,
+    longitude: -73.9855,
+    timestamp: new Date(Date.now() - 3600000).toISOString(), // 1 hour ago
+    status: "sent",
+  },
+  {
+    id: "alert-2",
+    title: "Weather Advisory",
+    type: "Advisory",
+    message: "Light rain expected in Central Park area. Carry umbrellas.",
+    latitude: 40.7829,
+    longitude: -73.9654,
+    timestamp: new Date(Date.now() - 7200000).toISOString(), // 2 hours ago
+    status: "active",
+  },
+];
+
+// New mock data from Police Monitoring Dashboard
+
+// Mock monitored tourists data
+export const monitoredTourists: MonitoredTourist[] = [
   {
     id: "T001",
     name: "John Smith",
@@ -113,10 +207,10 @@ export const tourists: Tourist[] = [
     safetyScore: 15,
     status: "sos",
   },
-]
+];
 
-// Mock alerts data
-export const alerts: Alert[] = [
+// Mock police alerts data
+export const policeAlerts: PoliceAlert[] = [
   {
     id: "A001",
     type: "Restricted Area",
@@ -152,7 +246,7 @@ export const alerts: Alert[] = [
     location: [28.6139, 77.209],
     touristId: "T001",
   },
-]
+];
 
 // Mock SOS reports data
 export const sosReports: SOSReport[] = [
@@ -175,7 +269,7 @@ export const sosReports: SOSReport[] = [
     raisedAt: "2024-01-14T15:30:00Z",
     resolved: "2024-01-14T18:45:00Z",
   },
-]
+];
 
 // Mock blockchain users data
 export const blockchainUsers: BlockchainUser[] = [
@@ -368,29 +462,42 @@ export const blockchainUsers: BlockchainUser[] = [
       },
     ],
   },
-]
+];
 
 // Helper functions for dashboard stats
 export const getDashboardStats = () => {
-  const totalTourists = tourists.length
-  const activeAlerts = alerts.length
-  const sosPending = sosReports.filter((report) => report.status === "pending").length
-  const resolvedCases = sosReports.filter((report) => report.status === "resolved").length
+  const totalTourists = monitoredTourists.length;
+  const activeAlerts = policeAlerts.length;
+  const sosPending = sosReports.filter(
+    (report) => report.status === "pending"
+  ).length;
+  const resolvedCases = sosReports.filter(
+    (report) => report.status === "resolved"
+  ).length;
 
   return {
     totalTourists,
     activeAlerts,
     sosPending,
     resolvedCases,
-  }
-}
+  };
+};
 
-// Helper function to get tourist by ID
-export const getTouristById = (id: string): Tourist | undefined => {
-  return tourists.find((tourist) => tourist.id === id)
-}
+// Helper function to get monitored tourist by ID
+export const getMonitoredTouristById = (
+  id: string
+): MonitoredTourist | undefined => {
+  return monitoredTourists.find((tourist) => tourist.id === id);
+};
+
+// Helper function to get tourist by ID (used in AlertsFeed)
+export const getTouristById = (id: string): MonitoredTourist | undefined => {
+  return monitoredTourists.find((tourist) => tourist.id === id);
+};
 
 // Helper function to get blockchain user by tourist ID
-export const getBlockchainUserByTouristId = (touristId: string): BlockchainUser | undefined => {
-  return blockchainUsers.find((user) => user.touristId === touristId)
-}
+export const getBlockchainUserByTouristId = (
+  touristId: string
+): BlockchainUser | undefined => {
+  return blockchainUsers.find((user) => user.touristId === touristId);
+};
