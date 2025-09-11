@@ -51,6 +51,18 @@
 			},
 			{
 				"indexed": false,
+				"internalType": "int256",
+				"name": "latitude",
+				"type": "int256"
+			},
+			{
+				"indexed": false,
+				"internalType": "int256",
+				"name": "longitude",
+				"type": "int256"
+			},
+			{
+				"indexed": false,
 				"internalType": "uint256",
 				"name": "timestamp",
 				"type": "uint256"
@@ -109,6 +121,21 @@
 				"internalType": "string",
 				"name": "_alertMessage",
 				"type": "string"
+			},
+			{
+				"internalType": "address",
+				"name": "_userAddress",
+				"type": "address"
+			},
+			{
+				"internalType": "int256",
+				"name": "_latitude",
+				"type": "int256"
+			},
+			{
+				"internalType": "int256",
+				"name": "_longitude",
+				"type": "int256"
 			}
 		],
 		"name": "Alert",

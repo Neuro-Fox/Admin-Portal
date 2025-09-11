@@ -3,7 +3,7 @@ import CryptoJS from "crypto-js";
 import CONTRACT_ABI from "../constant/ABI.json";
 
 const RPC_URL = "https://sepolia.infura.io/v3/3ca08f13b2f94d4aa806fead92888aa8";
-const CONTRACT_ADDRESS = "0x8aB06c2DDacF499Cc05693B866fE4f0042BFe867";
+const CONTRACT_ADDRESS = "0xA51EE10E3B482daaa0E18427C3dD13A02754A2A5";
 
 let contractWithSigner: ethers.Contract | null = null;
 
