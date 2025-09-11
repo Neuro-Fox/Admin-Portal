@@ -5,7 +5,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/u
 import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { Separator } from "@/components/ui/separator"
-// Removed mock data dependencies for on-chain only view
 
 type ReportItem = {
   id: string
@@ -31,36 +30,50 @@ interface ReportModalProps {
 export function ReportModal({ report, isOpen, onClose }: ReportModalProps) {
   if (!report) return null
 
-  const tourist = null
-  const blockchainUser = null
-
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle className="flex items-center gap-2">
-            <FileText className="size-5 text-blue-600" />
-            Report Details - {report.id}
+      <DialogContent className="max-w-3xl max-h-[85vh] overflow-y-auto">
+        <DialogHeader className="pb-6">
+          <DialogTitle className="flex items-center gap-3 text-xl">
+            <div className="p-2 bg-blue-100 rounded-lg">
+              <FileText className="size-5 text-blue-600" />
+            </div>
+            <div>
+              <div className="font-semibold">Report Details</div>
+              <div className="text-sm font-normal text-muted-foreground">ID: {report.id}</div>
+            </div>
           </DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-8">
           {/* Report Summary */}
-          <div className="grid gap-4 md:grid-cols-2">
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Report Type</label>
-                <div className="flex items-center gap-2 mt-1">
-                  <Badge variant={report.type === "alert" ? "secondary" : "destructive"} className="capitalize">
-                    {report.type}
-                  </Badge>
-                  <span className="text-sm">{report.alertMessage}</span>
+          <div className="bg-gray-50/50 rounded-xl p-6">
+            <h3 className="text-lg font-semibold mb-4 text-gray-900">Report Summary</h3>
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    Report Type
+                  </label>
+                  <div className="flex items-center gap-3">
+                    <Badge 
+                      variant={report.type === "alert" ? "secondary" : "destructive"} 
+                      className="capitalize text-sm px-3 py-1"
+                    >
+                      {report.type}
+                    </Badge>
+                    {report.alertMessage && (
+                      <span className="text-sm text-gray-700 font-medium">
+                        {report.alertMessage}
+                      </span>
+                    )}
+                  </div>
                 </div>
-              </div>
 
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Status</label>
-                <div className="mt-1">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    Status
+                  </label>
                   <Badge
                     variant={
                       report.status === "pending"
@@ -69,108 +82,161 @@ export function ReportModal({ report, isOpen, onClose }: ReportModalProps) {
                           ? "default"
                           : "secondary"
                     }
-                    className="capitalize"
+                    className="capitalize text-sm px-3 py-1"
                   >
                     {report.status}
                   </Badge>
                 </div>
               </div>
-            </div>
 
-            <div className="space-y-3">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Timestamp</label>
-                <div className="flex items-center gap-2 mt-1">
-                  <Clock className="size-4 text-muted-foreground" />
-                  <div>
-                    <div className="text-sm font-medium">{new Date(report.timestamp).toLocaleDateString()}</div>
-                    <div className="text-xs text-muted-foreground">
-                      {new Date(report.timestamp).toLocaleTimeString()}
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    Timestamp
+                  </label>
+                  <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+                    <Clock className="size-4 text-muted-foreground flex-shrink-0" />
+                    <div>
+                      <div className="text-sm font-medium text-gray-900">
+                        {new Date(report.timestamp).toLocaleDateString()}
+                      </div>
+                      <div className="text-xs text-muted-foreground">
+                        {new Date(report.timestamp).toLocaleTimeString()}
+                      </div>
                     </div>
                   </div>
                 </div>
-              </div>
 
-              {report.location && (
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Location</label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <MapPin className="size-4 text-muted-foreground" />
-                    <span className="text-sm font-mono">
-                      {report.location[0].toFixed(4)}, {report.location[1].toFixed(4)}
-                    </span>
+                {report.location && (
+                  <div>
+                    <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                      Location
+                    </label>
+                    <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+                      <MapPin className="size-4 text-muted-foreground flex-shrink-0" />
+                      <span className="text-sm font-mono text-gray-900">
+                        {report.location[0].toFixed(4)}, {report.location[1].toFixed(4)}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </div>
 
-          <Separator />
+          <Separator className="my-6" />
 
-          {/* On-chain Tourist Information */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <User className="size-5 text-blue-600" />
+          {/* Tourist Information */}
+          <div className="bg-blue-50/50 rounded-xl p-6">
+            <h3 className="text-lg font-semibold mb-6 flex items-center gap-3 text-gray-900">
+              <div className="p-2 bg-blue-100 rounded-lg">
+                <User className="size-5 text-blue-600" />
+              </div>
               Tourist Information
             </h3>
 
-            <div className="grid gap-4 md:grid-cols-2">
-              <div className="space-y-3">
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="space-y-4">
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">User Address</label>
-                  <p className="text-sm font-mono mt-1">{report.touristId}</p>
-                </div>
-
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Name</label>
-                  <p className="text-sm font-medium mt-1">{report.touristName}</p>
-                </div>
-              </div>
-
-              <div className="space-y-3">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Contact Number</label>
-                  <div className="flex items-center gap-2 mt-1">
-                    <Phone className="size-4 text-muted-foreground" />
-                    <span className="text-sm font-medium">{report.phoneNumber || '-'}</span>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    Wallet Address
+                  </label>
+                  <div className="p-3 bg-white rounded-lg border">
+                    <p className="text-sm font-mono text-gray-900 break-all">
+                      {report.touristId}
+                    </p>
                   </div>
                 </div>
 
                 <div>
-                  <label className="text-sm font-medium text-muted-foreground">Home Address</label>
-                  <p className="text-sm mt-1">{report.homeAddress || '-'}</p>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    Full Name
+                  </label>
+                  <div className="p-3 bg-white rounded-lg border">
+                    <p className="text-sm font-medium text-gray-900">
+                      {report.touristName}
+                    </p>
+                  </div>
+                </div>
+              </div>
+
+              <div className="space-y-4">
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    Contact Number
+                  </label>
+                  <div className="flex items-center gap-3 p-3 bg-white rounded-lg border">
+                    <Phone className="size-4 text-muted-foreground flex-shrink-0" />
+                    <span className="text-sm font-medium text-gray-900">
+                      {report.phoneNumber || 'Not provided'}
+                    </span>
+                  </div>
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                    Home Address
+                  </label>
+                  <div className="p-3 bg-white rounded-lg border">
+                    <p className="text-sm text-gray-900">
+                      {report.homeAddress || 'Not provided'}
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
 
-          <Separator />
+          <Separator className="my-6" />
 
-          {/* On-chain identity fields */}
-          <div>
-            <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
-              <Shield className="size-5 text-blue-600" />
+          {/* Identity Information */}
+          <div className="bg-green-50/50 rounded-xl p-6">
+            <h3 className="text-lg font-semibold mb-6 flex items-center gap-3 text-gray-900">
+              <div className="p-2 bg-green-100 rounded-lg">
+                <Shield className="size-5 text-green-600" />
+              </div>
               Identity Information
             </h3>
 
-            <div className="grid gap-4 md:grid-cols-2 text-sm">
+            <div className="grid gap-6 md:grid-cols-2">
               <div>
-                <span className="text-muted-foreground">Aadhar:</span>
-                <span className="ml-2 font-mono">{report.aadhar || '-'}</span>
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                  Aadhar Number
+                </label>
+                <div className="p-3 bg-white rounded-lg border">
+                  <span className="text-sm font-mono text-gray-900">
+                    {report.aadhar || 'Not provided'}
+                  </span>
+                </div>
               </div>
+              
               <div>
-                <span className="text-muted-foreground">Passport:</span>
-                <span className="ml-2 font-mono">{report.passport || '-'}</span>
+                <label className="text-sm font-medium text-muted-foreground mb-2 block">
+                  Passport Number
+                </label>
+                <div className="p-3 bg-white rounded-lg border">
+                  <span className="text-sm font-mono text-gray-900">
+                    {report.passport || 'Not provided'}
+                  </span>
+                </div>
               </div>
             </div>
           </div>
 
           {/* Action Buttons */}
-          <div className="flex gap-2 pt-4">
-            <Button variant="outline" className="flex-1 bg-transparent">
+          <div className="flex gap-4 pt-6 border-t">
+            <Button 
+              variant="outline" 
+              className="flex-1 h-11 bg-white hover:bg-gray-50 border-gray-300"
+            >
+              <FileText className="size-4 mr-2" />
               Raise Ticket
             </Button>
-            <Button variant="default" className="flex-1">
+            <Button 
+              variant="default" 
+              className="flex-1 h-11 bg-blue-600 hover:bg-blue-700"
+            >
+              <Shield className="size-4 mr-2" />
               Mark Resolved
             </Button>
           </div>
