@@ -13,7 +13,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { MapPin, User, Clock, Shield, Search } from "lucide-react";
+import { MapPin, User, Clock, Shield, Search, X } from "lucide-react";
 import type { Tourist } from "@/lib/mockData";
 
 // Fixed: Import MapContainer with proper typing
@@ -81,6 +81,27 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
   const [heatmapEnabled, setHeatmapEnabled] = useState(false);
   const [isLive, setIsLive] = useState(true);
   const [mapRef, setMapRef] = useState<any>(null);
+  const [searchMarker, setSearchMarker] = useState<any>(null);
+  const [searchError, setSearchError] = useState<string>("");
+
+  // Predefined locations for fallback search
+  const predefinedLocations = {
+    'delhi': { lat: 28.6139, lng: 77.209, name: 'New Delhi' },
+    'mumbai': { lat: 19.076, lng: 72.8777, name: 'Mumbai' },
+    'bangalore': { lat: 12.9716, lng: 77.5946, name: 'Bangalore' },
+    'bengaluru': { lat: 12.9716, lng: 77.5946, name: 'Bengaluru' },
+    'kolkata': { lat: 22.5726, lng: 88.3639, name: 'Kolkata' },
+    'chennai': { lat: 13.0827, lng: 80.2707, name: 'Chennai' },
+    'jaipur': { lat: 26.9124, lng: 75.7873, name: 'Jaipur' },
+    'goa': { lat: 15.2993, lng: 74.124, name: 'Goa' },
+    'agra': { lat: 27.1767, lng: 78.0081, name: 'Agra' },
+    'kerala': { lat: 10.8505, lng: 76.2711, name: 'Kerala' },
+    'rajasthan': { lat: 27.0238, lng: 74.2179, name: 'Rajasthan' },
+    'hyderabad': { lat: 17.385, lng: 78.4867, name: 'Hyderabad' },
+    'pune': { lat: 18.5204, lng: 73.8567, name: 'Pune' },
+    'ahmedabad': { lat: 23.0225, lng: 72.5714, name: 'Ahmedabad' },
+    'lucknow': { lat: 26.8467, lng: 80.9462, name: 'Lucknow' }
+  };
 
   useEffect(() => {
     setIsClient(true);
@@ -89,42 +110,108 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
   const handleSearch = async () => {
     if (!searchLocation.trim() || !mapRef) return;
 
+    setSearchError("");
+
     try {
-      // Simple geocoding simulation - in real app, use Google/Mapbox geocoding API
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
-          searchLocation
-        )}`
-      );
-      const data = await response.json();
-
-      if (data && data.length > 0) {
-        const { lat, lon } = data[0];
-        mapRef.setView([Number.parseFloat(lat), Number.parseFloat(lon)], 10);
-
-        // Add a red marker at searched location
-        const L = require("leaflet");
-        const searchIcon = new L.Icon({
-          iconUrl: `data:image/svg+xml;base64,${btoa(`
-            <svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
-              <path fill="#ef4444" stroke="#fff" strokeWidth="2" d="M12.5 0C5.596 0 0 5.596 0 12.5c0 12.5 12.5 28.5 12.5 28.5s12.5-16 12.5-28.5C25 5.596 19.404 0 12.5 0z"/>
-              <circle fill="#fff" cx="12.5" cy="12.5" r="6"/>
-            </svg>
-          `)}`,
-          iconSize: [25, 41],
-          iconAnchor: [12, 41],
-        });
-
-        L.marker([Number.parseFloat(lat), Number.parseFloat(lon)], {
-          icon: searchIcon,
-        })
-          .addTo(mapRef)
-          .bindPopup(`<b>Search Result</b><br/>${searchLocation}`)
-          .openPopup();
+      // Clear previous search marker
+      if (searchMarker) {
+        mapRef.removeLayer(searchMarker);
+        setSearchMarker(null);
       }
+
+      let latitude: number;
+      let longitude: number;
+      let displayName: string;
+
+      // Check if it's a predefined location first
+      const searchKey = searchLocation.toLowerCase().trim();
+      if (predefinedLocations[searchKey as keyof typeof predefinedLocations]) {
+        const location = predefinedLocations[searchKey as keyof typeof predefinedLocations];
+        latitude = location.lat;
+        longitude = location.lng;
+        displayName = location.name;
+      } else {
+        // Try to parse as coordinates (lat,lng)
+        const coordMatch = searchLocation.match(/^(-?\d+\.?\d*),\s*(-?\d+\.?\d*)$/);
+        if (coordMatch) {
+          latitude = Number.parseFloat(coordMatch[1]);
+          longitude = Number.parseFloat(coordMatch[2]);
+          displayName = `Coordinates: ${latitude}, ${longitude}`;
+        } else {
+          // Try external geocoding service with CORS proxy
+          try {
+            const response = await fetch(
+              `https://api.allorigins.win/get?url=${encodeURIComponent(
+                `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+                  searchLocation
+                )}&limit=1`
+              )}`
+            );
+            const proxyData = await response.json();
+            const data = JSON.parse(proxyData.contents);
+
+            if (data && data.length > 0) {
+              latitude = Number.parseFloat(data[0].lat);
+              longitude = Number.parseFloat(data[0].lon);
+              displayName = data[0].display_name || searchLocation;
+            } else {
+              throw new Error("Location not found");
+            }
+          } catch {
+            // If all else fails, provide helpful error
+            const suggestions = Object.keys(predefinedLocations)
+              .filter(city => city.includes(searchKey.substring(0, 3)))
+              .slice(0, 3);
+            
+            const suggestionText = suggestions.length > 0 
+              ? ` Try: ${suggestions.join(', ')}` 
+              : ' Try cities like: Delhi, Mumbai, Bangalore';
+            
+            throw new Error(`Location not found.${suggestionText} or use coordinates (lat,lng)`);
+          }
+        }
+      }
+
+      // Move map to searched location
+      mapRef.setView([latitude, longitude], 12);
+
+      // Add a red marker at searched location
+      const L = require("leaflet");
+      const searchIcon = new L.Icon({
+        iconUrl: `data:image/svg+xml;base64,${btoa(`
+          <svg width="25" height="41" viewBox="0 0 25 41" xmlns="http://www.w3.org/2000/svg">
+            <path fill="#ef4444" stroke="#fff" strokeWidth="2" d="M12.5 0C5.596 0 0 5.596 0 12.5c0 12.5 12.5 28.5 12.5 28.5s12.5-16 12.5-28.5C25 5.596 19.404 0 12.5 0z"/>
+            <circle fill="#fff" cx="12.5" cy="12.5" r="6"/>
+          </svg>
+        `)}`,
+        iconSize: [25, 41],
+        iconAnchor: [12, 41],
+        popupAnchor: [1, -34],
+      });
+
+      const marker = L.marker([latitude, longitude], {
+        icon: searchIcon,
+      });
+
+      marker
+        .addTo(mapRef)
+        .bindPopup(`<b>Search Result</b><br/>${displayName}`)
+        .openPopup();
+
+      setSearchMarker(marker);
     } catch (error) {
       console.error("Search failed:", error);
+      setSearchError(error instanceof Error ? error.message : "Search failed. Try using coordinates (lat,lng)");
     }
+  };
+
+  const clearSearch = () => {
+    if (searchMarker && mapRef) {
+      mapRef.removeLayer(searchMarker);
+      setSearchMarker(null);
+    }
+    setSearchLocation("");
+    setSearchError("");
   };
 
   if (!isClient) {
@@ -237,16 +324,33 @@ export function MapView({ tourists, onBoundsChange }: MapViewProps) {
         </div>
 
         <div className="flex items-center gap-2 flex-1 min-w-[200px]">
-          <Input
-            placeholder="Search location..."
-            value={searchLocation}
-            onChange={(e) => setSearchLocation(e.target.value)}
-            onKeyPress={(e) => e.key === "Enter" && handleSearch()}
-            className="flex-1"
-          />
-          <Button size="sm" onClick={handleSearch}>
-            <Search className="size-4" />
-          </Button>
+          <div className="flex-1 space-y-1">
+            <div className="flex gap-2">
+              <Input
+                placeholder="Search location or coordinates (lat,lng)..."
+                value={searchLocation}
+                onChange={(e) => {
+                  setSearchLocation(e.target.value);
+                  if (searchError) setSearchError(""); // Clear error when typing
+                }}
+                onKeyPress={(e) => e.key === "Enter" && handleSearch()}
+                className="flex-1"
+              />
+              <Button size="sm" onClick={handleSearch} disabled={!searchLocation.trim()}>
+                <Search className="size-4" />
+              </Button>
+              {(searchLocation || searchMarker) && (
+                <Button size="sm" variant="outline" onClick={clearSearch}>
+                  <X className="size-4" />
+                </Button>
+              )}
+            </div>
+            {searchError && (
+              <p className="text-xs text-red-600 bg-red-50 px-2 py-1 rounded">
+                {searchError}
+              </p>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center gap-4">
