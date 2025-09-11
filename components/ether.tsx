@@ -34,3 +34,35 @@ export const getContract = () => {
   if (!encrypted) throw new Error("Owner key not set");
   throw new Error("Password required to unlock key");
 };
+
+export const sendZoneAlert = async (
+  alertMessage: string,
+  alertType: string,
+  latitude: number,
+  longitude: number,
+  radius: number
+): Promise<ethers.TransactionResponse> => {
+  const contract = getContract();
+  
+  
+  const latitudeInt = Math.round(latitude * 1e6);
+  const longitudeInt = Math.round(longitude * 1e6);
+  
+  
+  const radiusMeters = Math.round(radius * 1000);
+  
+  try {
+    const tx = await contract.sendZoneAlert(
+      alertMessage,
+      alertType,
+      latitudeInt,
+      longitudeInt,
+      radiusMeters
+    );
+    
+    return tx;
+  } catch (error) {
+    console.error("Error sending zone alert:", error);
+    throw error;
+  }
+};
