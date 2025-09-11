@@ -12,6 +12,7 @@ interface Alert {
   message: string;
   latitude: number;
   longitude: number;
+  radius?: number;
   timestamp: string;
   status: "active" | "sent" | "expired";
 }
@@ -21,6 +22,7 @@ export default function AlertsPage() {
   const [selectedLocation, setSelectedLocation] = useState<{
     lat: number;
     lng: number;
+    radius?: number;
   } | null>(null);
 
   // Fetch existing alerts
@@ -38,8 +40,8 @@ export default function AlertsPage() {
     fetchAlerts();
   }, []);
 
-  const handleLocationSelect = (lat: number, lng: number) => {
-    setSelectedLocation({ lat, lng });
+  const handleLocationSelect = (lat: number, lng: number, radius: number) => {
+    setSelectedLocation({ lat, lng, radius });
   };
 
   const handleAlertCreated = (newAlert: Alert) => {

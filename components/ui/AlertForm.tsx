@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -17,7 +17,7 @@ import {
 import { useToast } from "@/hooks/use-toast";
 
 interface AlertFormProps {
-  selectedLocation: { lat: number; lng: number } | null;
+  selectedLocation: { lat: number; lng: number; radius?: number } | null;
   onAlertCreated: (alert: any) => void;
 }
 
@@ -31,17 +31,19 @@ export function AlertForm({
     message: "",
     latitude: "",
     longitude: "",
+    radius: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   // Update form when location is selected from map
-  useState(() => {
+  useEffect(() => {
     if (selectedLocation) {
       setFormData((prev) => ({
         ...prev,
         latitude: selectedLocation.lat.toFixed(6),
         longitude: selectedLocation.lng.toFixed(6),
+        radius: selectedLocation.radius ? selectedLocation.radius.toString() : prev.radius,
       }));
     }
   }, [selectedLocation]);
@@ -54,7 +56,8 @@ export function AlertForm({
       !formData.type ||
       !formData.message ||
       !formData.latitude ||
-      !formData.longitude
+      !formData.longitude ||
+      !formData.radius
     ) {
       toast({
         title: "Error",
@@ -73,6 +76,7 @@ export function AlertForm({
         message: formData.message,
         latitude: Number.parseFloat(formData.latitude),
         longitude: Number.parseFloat(formData.longitude),
+        radius: Number.parseFloat(formData.radius),
       };
 
       const response = await fetch("/api/alerts", {
@@ -97,6 +101,7 @@ export function AlertForm({
         message: "",
         latitude: "",
         longitude: "",
+        radius: "",
       });
 
       toast({
@@ -192,6 +197,22 @@ export function AlertForm({
             required
           />
         </div>
+      </div>
+
+      <div>
+        <Label htmlFor="radius">Alert Radius (meters)</Label>
+        <Input
+          id="radius"
+          type="number"
+          min="100"
+          step="100"
+          value={formData.radius}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, radius: e.target.value }))
+          }
+          placeholder="1000"
+          required
+        />
       </div>
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>
