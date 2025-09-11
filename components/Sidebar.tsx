@@ -14,6 +14,7 @@ import {
   Phone,
   Search,
 } from "lucide-react";
+import Image from "next/image";
 
 import {
   Sidebar,
@@ -55,7 +56,13 @@ export function AppSidebar() {
     <Sidebar>
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-2 py-2">
-          <Shield className="size-8 text-blue-600" />
+          <Image
+            src="/logo.png" // place your logo in /public
+            alt="Logo"
+            width={40}
+            height={40}
+            className="object-contain"
+          />
           <div>
             <h2 className="font-semibold text-sidebar-foreground">
               Police Monitor

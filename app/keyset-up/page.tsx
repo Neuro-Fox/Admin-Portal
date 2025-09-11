@@ -15,6 +15,7 @@ import {
 import { Label } from "@/components/ui/label";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Eye, EyeOff, Key, Lock, Shield } from "lucide-react";
+import Image from "next/image";
 
 export default function KeySetupPage() {
   const [mode, setMode] = useState<"new" | "unlock">("new");
@@ -135,8 +136,14 @@ export default function KeySetupPage() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
-          <div className="mx-auto w-12 h-12 bg-blue-600 rounded-full flex items-center justify-center mb-4">
-            <Shield className="w-6 h-6 text-white" />
+          <div className=" justify-center items-center mb-4">
+            <Image
+              src="/logo.jpg"
+              alt="Logo"
+              width={70}
+              height={70}
+              className="object-contain"
+            />
           </div>
           <CardTitle className="text-2xl font-bold">
             {mode === "new" ? "Setup Your Key" : "Unlock Dashboard"}
