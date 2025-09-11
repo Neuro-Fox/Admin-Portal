@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useState, useEffect, useCallback } from "react";
 import { Button } from "@/components/ui/button";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, Variants } from "framer-motion";
 
 const mobileImages = [
   {
@@ -76,9 +76,11 @@ const features = [
   },
 ];
 
-// Animation variants
-const containerVariants = {
-  hidden: { opacity: 0 },
+// Properly typed animation variants
+const containerVariants: Variants = {
+  hidden: {
+    opacity: 0,
+  },
   visible: {
     opacity: 1,
     transition: {
@@ -88,8 +90,11 @@ const containerVariants = {
   },
 };
 
-const itemVariants = {
-  hidden: { opacity: 0, y: 20 },
+const itemVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 20,
+  },
   visible: {
     opacity: 1,
     y: 0,
@@ -100,8 +105,12 @@ const itemVariants = {
   },
 };
 
-const phoneVariants = {
-  hidden: { opacity: 0, scale: 0.8, rotateY: -15 },
+const phoneVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    scale: 0.8,
+    rotateY: -15,
+  },
   visible: {
     opacity: 1,
     scale: 1,
@@ -120,8 +129,11 @@ const phoneVariants = {
   },
 };
 
-const featureCardVariants = {
-  hidden: { opacity: 0, y: 30 },
+const featureCardVariants: Variants = {
+  hidden: {
+    opacity: 0,
+    y: 30,
+  },
   visible: {
     opacity: 1,
     y: 0,
@@ -313,6 +325,7 @@ export default function ContentSection() {
                                 alt={image.alt}
                                 fill
                                 className="object-cover"
+                                sizes="(max-width: 768px) 100vw, 50vw"
                               />
                               {/* Enhanced overlay with app info */}
                               <motion.div
@@ -373,7 +386,7 @@ export default function ContentSection() {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 initial={{ opacity: 0, x: -10 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3 }}
               >
                 <ChevronLeft className="h-5 w-5" />
@@ -386,7 +399,7 @@ export default function ContentSection() {
                 whileHover={{ scale: 1.1 }}
                 whileTap={{ scale: 0.95 }}
                 initial={{ opacity: 0, x: 10 }}
-                whileInView={{ opacity: 1, x: 0 }}
+                animate={{ opacity: 1, x: 0 }}
                 transition={{ duration: 0.3 }}
               >
                 <ChevronRight className="h-5 w-5" />
@@ -396,7 +409,7 @@ export default function ContentSection() {
               <motion.div
                 className="flex justify-center mt-6 space-x-2"
                 initial={{ opacity: 0, y: 10 }}
-                whileInView={{ opacity: 1, y: 0 }}
+                animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: 0.3 }}
               >
                 {mobileImages.map((_, index) => (

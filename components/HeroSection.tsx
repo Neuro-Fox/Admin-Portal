@@ -168,7 +168,7 @@ const HeroSection = () => {
                     loop
                     playsInline
                     onLoadedData={handleVideoLoad}
-                    poster="/video/thumbnail.jpg" // Optional: Add a poster image
+                    poster="/Dashboard/img3.png"
                   >
                     <source src="/video/video.mp4" type="video/mp4" />
                     Your browser does not support the video tag.

@@ -3,7 +3,7 @@ import CryptoJS from "crypto-js";
 import CONTRACT_ABI from "../constant/ABI.json";
 
 const RPC_URL = "https://sepolia.infura.io/v3/3ca08f13b2f94d4aa806fead92888aa8";
-const CONTRACT_ADDRESS = "0x5f331A051e318EE2d3cCe3771E26A77b51c5BdB5";
+const CONTRACT_ADDRESS = "0x9D7f74d0C41E726EC95884E0e97Fa6129e3b5E99";
 
 let contractWithSigner: ethers.Contract | null = null;
 
@@ -33,4 +33,36 @@ export const getContract = () => {
   const encrypted = sessionStorage.getItem("ENCRYPTED_OWNER_KEY");
   if (!encrypted) throw new Error("Owner key not set");
   throw new Error("Password required to unlock key");
+};
+
+export const sendZoneAlert = async (
+  alertMessage: string,
+  alertType: string,
+  latitude: number,
+  longitude: number,
+  radius: number
+): Promise<ethers.TransactionResponse> => {
+  const contract = getContract();
+  
+  
+  const latitudeInt = Math.round(latitude * 1e6);
+  const longitudeInt = Math.round(longitude * 1e6);
+  
+  
+  const radiusMeters = Math.round(radius * 1000);
+  
+  try {
+    const tx = await contract.sendZoneAlert(
+      alertMessage,
+      alertType,
+      latitudeInt,
+      longitudeInt,
+      radiusMeters
+    );
+    
+    return tx;
+  } catch (error) {
+    console.error("Error sending zone alert:", error);
+    throw error;
+  }
 };

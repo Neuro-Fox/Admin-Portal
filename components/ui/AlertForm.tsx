@@ -2,7 +2,7 @@
 
 import type React from "react";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -15,9 +15,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useToast } from "@/hooks/use-toast";
+import { sendZoneAlert } from "@/components/ether";
 
 interface AlertFormProps {
-  selectedLocation: { lat: number; lng: number } | null;
+  selectedLocation: { lat: number; lng: number; radius?: number } | null;
   onAlertCreated: (alert: any) => void;
 }
 
@@ -31,17 +32,19 @@ export function AlertForm({
     message: "",
     latitude: "",
     longitude: "",
+    radius: "",
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { toast } = useToast();
 
   // Update form when location is selected from map
-  useState(() => {
+  useEffect(() => {
     if (selectedLocation) {
       setFormData((prev) => ({
         ...prev,
         latitude: selectedLocation.lat.toFixed(6),
         longitude: selectedLocation.lng.toFixed(6),
+        radius: selectedLocation.radius ? selectedLocation.radius.toString() : prev.radius,
       }));
     }
   }, [selectedLocation]);
@@ -54,7 +57,8 @@ export function AlertForm({
       !formData.type ||
       !formData.message ||
       !formData.latitude ||
-      !formData.longitude
+      !formData.longitude ||
+      !formData.radius
     ) {
       toast({
         title: "Error",
@@ -73,18 +77,50 @@ export function AlertForm({
         message: formData.message,
         latitude: Number.parseFloat(formData.latitude),
         longitude: Number.parseFloat(formData.longitude),
+        radius: Number.parseFloat(formData.radius),
       };
 
+      // Call the smart contract function first
+      toast({
+        title: "Processing",
+        description: "Sending alert to blockchain...",
+      });
+
+      const tx = await sendZoneAlert(
+        alertData.message,
+        alertData.type,
+        alertData.latitude,
+        alertData.longitude,
+        alertData.radius
+      );
+
+      // Wait for transaction confirmation
+      toast({
+        title: "Processing",
+        description: "Waiting for blockchain confirmation...",
+      });
+
+      await tx.wait();
+
+      toast({
+        title: "Success",
+        description: "Alert sent to blockchain successfully",
+      });
+
+      // Then call the API to store in database
       const response = await fetch("/api/alerts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(alertData),
+        body: JSON.stringify({
+          ...alertData,
+          transactionHash: tx.hash,
+        }),
       });
 
       if (!response.ok) {
-        throw new Error("Failed to create alert");
+        throw new Error("Failed to store alert in database");
       }
 
       const newAlert = await response.json();
@@ -97,17 +133,37 @@ export function AlertForm({
         message: "",
         latitude: "",
         longitude: "",
+        radius: "",
       });
 
       toast({
         title: "Success",
-        description: "Alert created and broadcasted successfully",
+        description: "Alert created and broadcasted to blockchain successfully",
       });
     } catch (error) {
       console.error("Error creating alert:", error);
+      
+      let errorMessage = "Failed to create alert. Please try again.";
+      
+      if (error instanceof Error) {
+        if (error.message.includes("Owner key not set")) {
+          errorMessage = "Please set up your private key first in Key Setup.";
+        } else if (error.message.includes("Password required")) {
+          errorMessage = "Please unlock your key with the correct password.";
+        } else if (error.message.includes("user rejected transaction")) {
+          errorMessage = "Transaction was rejected. Please try again.";
+        } else if (error.message.includes("insufficient funds")) {
+          errorMessage = "Insufficient funds for gas fee. Please add ETH to your wallet.";
+        } else if (error.message.includes("blockchain")) {
+          errorMessage = "Blockchain transaction failed. Please try again.";
+        } else if (error.message.includes("database")) {
+          errorMessage = "Alert sent to blockchain but failed to save locally. Please check the dashboard.";
+        }
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to create alert. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
     } finally {
@@ -192,6 +248,22 @@ export function AlertForm({
             required
           />
         </div>
+      </div>
+
+      <div>
+        <Label htmlFor="radius">Alert Radius (meters)</Label>
+        <Input
+          id="radius"
+          type="number"
+          min="100"
+          step="100"
+          value={formData.radius}
+          onChange={(e) =>
+            setFormData((prev) => ({ ...prev, radius: e.target.value }))
+          }
+          placeholder="1000"
+          required
+        />
       </div>
 
       <Button type="submit" className="w-full" disabled={isSubmitting}>

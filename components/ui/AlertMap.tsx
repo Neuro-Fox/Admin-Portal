@@ -1,14 +1,21 @@
 "use client";
 
-import { useRef } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   MapContainer,
   TileLayer,
   Marker,
   Popup,
+  Circle,
   useMapEvents,
+  useMap,
 } from "react-leaflet";
 import L from "leaflet";
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+import { Slider } from "@/components/ui/slider";
+import { Label } from "@/components/ui/label";
+import { Search, MapPin } from "lucide-react";
 
 import "leaflet/dist/leaflet.css";
 
@@ -32,9 +39,16 @@ interface Alert {
   timestamp: string;
 }
 
+interface SearchResult {
+  place_id: string;
+  display_name: string;
+  lat: string;
+  lon: string;
+}
+
 interface AlertsMapProps {
-  onLocationSelect: (lat: number, lng: number) => void;
-  selectedLocation: { lat: number; lng: number } | null;
+  onLocationSelect: (lat: number, lng: number, radius: number) => void;
+  selectedLocation: { lat: number; lng: number; radius?: number } | null;
   existingAlerts: Alert[];
 }
 
@@ -102,14 +116,26 @@ const selectedIcon = new L.Icon({
 
 function MapClickHandler({
   onLocationSelect,
+  currentRadius,
 }: {
-  onLocationSelect: (lat: number, lng: number) => void;
+  onLocationSelect: (lat: number, lng: number, radius: number) => void;
+  currentRadius: number;
 }) {
   useMapEvents({
     click: (e) => {
-      onLocationSelect(e.latlng.lat, e.latlng.lng);
+      onLocationSelect(e.latlng.lat, e.latlng.lng, currentRadius);
     },
   });
+  return null;
+}
+
+function MapCenter({ center }: { center: [number, number] }) {
+  const map = useMap();
+  
+  useEffect(() => {
+    map.setView(center, 15);
+  }, [map, center]);
+  
   return null;
 }
 
@@ -119,60 +145,184 @@ export function AlertsMap({
   existingAlerts,
 }: AlertsMapProps) {
   const mapRef = useRef<L.Map>(null);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
+  const [isSearching, setIsSearching] = useState(false);
+  const [radius, setRadius] = useState(selectedLocation?.radius || 1000);
+  const [mapCenter, setMapCenter] = useState<[number, number]>([40.7128, -74.006]);
+
+  useEffect(() => {
+    if (selectedLocation?.radius) {
+      setRadius(selectedLocation.radius);
+    }
+  }, [selectedLocation]);
+
+  const searchLocation = async () => {
+    if (!searchQuery.trim()) return;
+    
+    setIsSearching(true);
+    try {
+      const response = await fetch(
+        `https://nominatim.openstreetmap.org/search?format=json&q=${encodeURIComponent(
+          searchQuery
+        )}&limit=5`
+      );
+      const data = await response.json();
+      setSearchResults(data);
+    } catch (error) {
+      console.error("Search error:", error);
+    } finally {
+      setIsSearching(false);
+    }
+  };
+
+  const selectSearchResult = (result: SearchResult) => {
+    const lat = parseFloat(result.lat);
+    const lng = parseFloat(result.lon);
+    setMapCenter([lat, lng]);
+    onLocationSelect(lat, lng, radius);
+    setSearchResults([]);
+    setSearchQuery("");
+  };
+
+  const handleRadiusChange = (newRadius: number[]) => {
+    const radiusValue = newRadius[0];
+    setRadius(radiusValue);
+    if (selectedLocation) {
+      onLocationSelect(selectedLocation.lat, selectedLocation.lng, radiusValue);
+    }
+  };
 
   return (
-    <div className="h-full w-full">
-      <MapContainer
-        ref={mapRef}
-        center={[40.7128, -74.006]} // NYC default
-        zoom={12}
-        className="h-full w-full"
-        zoomControl={true}
-      >
-        <TileLayer
-          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-        />
-
-        <MapClickHandler onLocationSelect={onLocationSelect} />
-
-        {/* Selected location marker */}
-        {selectedLocation && (
-          <Marker
-            position={[selectedLocation.lat, selectedLocation.lng]}
-            icon={selectedIcon}
+    <div className="h-full w-full flex flex-col">
+      {/* Search Controls */}
+      <div className="p-4 border-b space-y-4">
+        {/* Search Input */}
+        <div className="flex gap-2">
+          <div className="relative flex-1">
+            <Input
+              type="text"
+              placeholder="Search for a location..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              onKeyPress={(e) => e.key === "Enter" && searchLocation()}
+              className="pr-10"
+            />
+            <Search className="absolute right-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" />
+          </div>
+          <Button 
+            onClick={searchLocation} 
+            disabled={isSearching || !searchQuery.trim()}
+            size="sm"
           >
-            <Popup>
-              <div className="p-2">
-                <h3 className="font-semibold">Selected Location</h3>
-                <p className="text-sm">
-                  Lat: {selectedLocation.lat.toFixed(6)}
-                </p>
-                <p className="text-sm">
-                  Lng: {selectedLocation.lng.toFixed(6)}
-                </p>
+            {isSearching ? "..." : "Search"}
+          </Button>
+        </div>
+
+        {/* Search Results */}
+        {searchResults.length > 0 && (
+          <div className="space-y-1 max-h-32 overflow-y-auto">
+            {searchResults.map((result) => (
+              <div
+                key={result.place_id}
+                className="p-2 text-sm border rounded cursor-pointer hover:bg-gray-50 flex items-center gap-2"
+                onClick={() => selectSearchResult(result)}
+              >
+                <MapPin className="h-4 w-4 text-gray-400 flex-shrink-0" />
+                <span className="truncate">{result.display_name}</span>
               </div>
-            </Popup>
-          </Marker>
+            ))}
+          </div>
         )}
 
-        {/* Existing alerts markers */}
-        {existingAlerts.map((alert) => (
-          <Marker
-            key={alert.id}
-            position={[alert.latitude, alert.longitude]}
-            icon={alertIcons[alert.type]}
-          >
-            <Popup>
-              <div className="p-2">
-                <h3 className="font-semibold">{alert.title}</h3>
-                <p className="text-sm text-gray-600">{alert.type}</p>
-                <p className="text-sm mt-1">{alert.timestamp}</p>
-              </div>
-            </Popup>
-          </Marker>
-        ))}
-      </MapContainer>
+        {/* Radius Control */}
+        <div className="space-y-2">
+          <div className="flex items-center justify-between">
+            <Label htmlFor="radius-slider">Alert Radius</Label>
+            <span className="text-sm text-gray-600">{radius.toLocaleString()} meters</span>
+          </div>
+          <Slider
+            id="radius-slider"
+            min={100}
+            max={10000}
+            step={100}
+            value={[radius]}
+            onValueChange={handleRadiusChange}
+            className="w-full"
+          />
+        </div>
+      </div>
+
+      {/* Map */}
+      <div className="flex-1">
+        <MapContainer
+          ref={mapRef}
+          center={mapCenter}
+          zoom={12}
+          className="h-full w-full"
+          zoomControl={true}
+        >
+          <TileLayer
+            attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+            url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+          />
+
+          <MapCenter center={mapCenter} />
+          <MapClickHandler onLocationSelect={onLocationSelect} currentRadius={radius} />
+
+          {/* Selected location marker with radius circle */}
+          {selectedLocation && (
+            <>
+              <Marker
+                position={[selectedLocation.lat, selectedLocation.lng]}
+                icon={selectedIcon}
+              >
+                <Popup>
+                  <div className="p-2">
+                    <h3 className="font-semibold">Selected Location</h3>
+                    <p className="text-sm">
+                      Lat: {selectedLocation.lat.toFixed(6)}
+                    </p>
+                    <p className="text-sm">
+                      Lng: {selectedLocation.lng.toFixed(6)}
+                    </p>
+                    <p className="text-sm">
+                      Radius: {radius.toLocaleString()} meters
+                    </p>
+                  </div>
+                </Popup>
+              </Marker>
+              <Circle
+                center={[selectedLocation.lat, selectedLocation.lng]}
+                radius={radius}
+                pathOptions={{
+                  fillColor: "#10B981",
+                  fillOpacity: 0.2,
+                  color: "#10B981",
+                  weight: 2,
+                }}
+              />
+            </>
+          )}
+
+          {/* Existing alerts markers */}
+          {existingAlerts.map((alert) => (
+            <Marker
+              key={alert.id}
+              position={[alert.latitude, alert.longitude]}
+              icon={alertIcons[alert.type]}
+            >
+              <Popup>
+                <div className="p-2">
+                  <h3 className="font-semibold">{alert.title}</h3>
+                  <p className="text-sm text-gray-600">{alert.type}</p>
+                  <p className="text-sm mt-1">{alert.timestamp}</p>
+                </div>
+              </Popup>
+            </Marker>
+          ))}
+        </MapContainer>
+      </div>
     </div>
   );
 }

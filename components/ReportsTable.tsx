@@ -9,52 +9,35 @@ import { Badge } from "@/components/ui/badge"
 import { Button } from "@/components/ui/button"
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { alerts, sosReports, getTouristById } from "@/lib/mockData"
 import { ReportModal } from "./ReportModal"
 
-type ReportItem = {
+export type ReportItem = {
   id: string
   type: "alert" | "sos"
   touristId: string
   touristName: string
-  alertType?: string
+  alertMessage?: string
   timestamp: string
   status: string
   location?: [number, number]
+  phoneNumber?: string
+  aadhar?: string
+  passport?: string
+  homeAddress?: string
 }
 
-export function ReportsTable() {
+type ReportsTableProps = {
+  externalItems?: ReportItem[]
+}
+
+export function ReportsTable({ externalItems = [] }: ReportsTableProps) {
   const [selectedReport, setSelectedReport] = useState<ReportItem | null>(null)
   const [isModalOpen, setIsModalOpen] = useState(false)
 
-  // Combine alerts and SOS reports into a unified format
-  const reportItems: ReportItem[] = [
-    ...alerts.map((alert) => {
-      const tourist = getTouristById(alert.touristId)
-      return {
-        id: alert.id,
-        type: "alert" as const,
-        touristId: alert.touristId,
-        touristName: tourist?.name || "Unknown Tourist",
-        alertType: alert.type,
-        timestamp: alert.timestamp,
-        status: "active",
-        location: alert.location,
-      }
-    }),
-    ...sosReports.map((sos) => {
-      const tourist = getTouristById(sos.touristId)
-      return {
-        id: sos.id,
-        type: "sos" as const,
-        touristId: sos.touristId,
-        touristName: tourist?.name || "Unknown Tourist",
-        alertType: "SOS Emergency",
-        timestamp: sos.raisedAt,
-        status: sos.status,
-      }
-    }),
-  ].sort((a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime())
+  // Only on-chain items
+  const reportItems: ReportItem[] = [...externalItems].sort(
+    (a, b) => new Date(b.timestamp).getTime() - new Date(a.timestamp).getTime()
+  )
 
   const handleRowClick = (report: ReportItem) => {
     setSelectedReport(report)
@@ -116,11 +99,12 @@ export function ReportsTable() {
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Type</TableHead>
-                  <TableHead>Tourist</TableHead>
-                  <TableHead>Alert/SOS Type</TableHead>
+                  <TableHead>Tourist ID</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Alert Message</TableHead>
                   <TableHead>Timestamp</TableHead>
                   <TableHead>Status</TableHead>
+                  <TableHead>Contact Number</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -132,10 +116,7 @@ export function ReportsTable() {
                     onClick={() => handleRowClick(report)}
                   >
                     <TableCell>
-                      <div className="flex items-center gap-2">
-                        {getTypeIcon(report.type)}
-                        <span className="capitalize font-medium">{report.type}</span>
-                      </div>
+                      <span className="font-mono">{report.touristId}</span>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -144,7 +125,7 @@ export function ReportsTable() {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <span className="font-medium">{report.alertType}</span>
+                      <span className="font-medium">{report.alertMessage}</span>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
@@ -158,6 +139,12 @@ export function ReportsTable() {
                       </div>
                     </TableCell>
                     <TableCell>{getStatusBadge(report.status, report.type)}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center gap-2">
+                        <Phone className="size-4 text-muted-foreground" />
+                        <span>{report.phoneNumber || "-"}</span>
+                      </div>
+                    </TableCell>
                     <TableCell>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>

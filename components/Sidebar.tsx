@@ -58,10 +58,10 @@ export function AppSidebar() {
       <SidebarHeader className="border-b border-sidebar-border">
         <div className="flex items-center gap-2 px-2 py-2">
           <Image
-            src="/logo.jpg" // place your logo in /public
+            src="/logo.png" // place your logo in /public
             alt="Logo"
-            width={36}
-            height={36}
+            width={40}
+            height={40}
             className="object-contain"
           />
           <div>

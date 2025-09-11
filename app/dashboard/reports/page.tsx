@@ -1,14 +1,60 @@
-import { ReportsTable } from "@/components/ReportsTable"
+"use client"
+import { ReportsTable, type ReportItem } from "@/components/ReportsTable"
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { FileText, AlertTriangle, Phone, TrendingUp } from "lucide-react"
-import { alerts, sosReports, getDashboardStats } from "@/lib/mockData"
+import { useEffect, useMemo, useState } from "react"
+import { getContract } from "@/components/ether"
 
 export default function ReportsPage() {
-  const stats = getDashboardStats()
-  const totalReports = alerts.length + sosReports.length
-  const pendingSOS = sosReports.filter((report) => report.status === "pending").length
-  const resolvedSOS = sosReports.filter((report) => report.status === "resolved").length
+  const stats = { totalTourists: 0, activeAlerts: 0, sosPending: 0, resolvedCases: 0 }
+  const totalReports = 0
+  const pendingSOS = 0
+  const resolvedSOS = 0
+  const [chainReports, setChainReports] = useState<ReportItem[]>([])
+  const [lastSeenBlock, setLastSeenBlock] = useState<number | null>(null)
 
+    let contract = getContract()
+    
+    const handler = (
+      userAddress: string,
+      name: string,
+      homeAddress: string,
+      phoneNumber: string,
+      aadhar: string,
+      passport: string,
+      alertMessage: string,
+      latitude: bigint,
+      longitude: bigint,
+      timestamp: bigint
+    ) => {
+      console.log("AlertEvent", userAddress, name, homeAddress, phoneNumber, aadhar, passport, alertMessage, latitude, longitude, timestamp)
+      const id = `${userAddress}-${timestamp.toString()}`
+      const item: ReportItem = {
+        id,
+        type: "alert",
+        touristId: userAddress,
+        touristName: name || "Unknown Tourist",
+        alertMessage: alertMessage || "On-chain Alert",
+        timestamp: new Date(Number(timestamp) * 1000).toISOString(),
+        status: "active",
+        location: [Number(latitude), Number(longitude)],
+        phoneNumber,
+        aadhar,
+        passport,
+        homeAddress,
+      }
+      setChainReports((prev) => {
+        if (prev.some((r) => r.id === id)) return prev
+        return [item, ...prev]
+      })
+    }
+
+    // live stream
+    try {
+      contract.on("AlertEvent", handler)
+    } catch (err) {
+      console.warn("Live subscription failed:", err)
+    }
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-2">
@@ -16,65 +62,11 @@ export default function ReportsPage() {
         <h1 className="text-3xl font-bold text-foreground">Reports & Incidents</h1>
       </div>
 
-      {/* Reports Stats */}
-      <div className="grid gap-4 md:grid-cols-4">
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Total Reports</CardTitle>
-            <div className="p-2 rounded-lg bg-blue-50">
-              <FileText className="size-4 text-blue-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{totalReports}</div>
-            <p className="text-xs text-muted-foreground">All incidents tracked</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Active Alerts</CardTitle>
-            <div className="p-2 rounded-lg bg-orange-50">
-              <AlertTriangle className="size-4 text-orange-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{alerts.length}</div>
-            <p className="text-xs text-muted-foreground">Require attention</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Pending SOS</CardTitle>
-            <div className="p-2 rounded-lg bg-red-50">
-              <Phone className="size-4 text-red-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">{pendingSOS}</div>
-            <p className="text-xs text-muted-foreground">Emergency calls</p>
-          </CardContent>
-        </Card>
-
-        <Card className="border-0 shadow-sm">
-          <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">Resolution Rate</CardTitle>
-            <div className="p-2 rounded-lg bg-green-50">
-              <TrendingUp className="size-4 text-green-600" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-2xl font-bold text-foreground">
-              {sosReports.length > 0 ? Math.round((resolvedSOS / sosReports.length) * 100) : 0}%
-            </div>
-            <p className="text-xs text-muted-foreground">Cases resolved</p>
-          </CardContent>
-        </Card>
-      </div>
+      {/* Reports Stats - hidden when using only on-chain stream */}
+      <div className="grid gap-4 md:grid-cols-4 hidden"></div>
 
       {/* Reports Table */}
-      <ReportsTable />
+      <ReportsTable externalItems={chainReports} />
     </div>
   )
 }
