@@ -18,8 +18,8 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
     const checkAuth = () => {
       try {
         // Check if user is authenticated in session
-        const authenticated = sessionStorage.getItem("AUTHENTICATED");
-        
+        const authenticated = localStorage.getItem("AUTHENTICATED");
+
         if (!authenticated) {
           // Not authenticated, redirect to key setup
           router.push("/keyset-up");
@@ -27,11 +27,11 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         }
 
         // Check if private key exists and is accessible
-        const encryptedKey = sessionStorage.getItem("ENCRYPTED_OWNER_KEY");
-        
+        const encryptedKey = localStorage.getItem("ENCRYPTED_OWNER_KEY");
+
         if (!encryptedKey) {
           // No key stored, redirect to key setup
-          sessionStorage.removeItem("AUTHENTICATED");
+          localStorage.removeItem("AUTHENTICATED");
           router.push("/keyset-up");
           return;
         }
@@ -43,14 +43,13 @@ export function ProtectedRoute({ children }: ProtectedRouteProps) {
         } catch (error) {
           // Key exists but contract not accessible (password needed)
           // This might happen on page refresh - redirect to unlock
-          sessionStorage.removeItem("AUTHENTICATED");
+          localStorage.removeItem("AUTHENTICATED");
           router.push("/keyset-up");
           return;
         }
-
       } catch (error) {
         console.error("Auth check failed:", error);
-        sessionStorage.removeItem("AUTHENTICATED");
+        localStorage.removeItem("AUTHENTICATED");
         router.push("/keyset-up");
       } finally {
         setIsLoading(false);
@@ -99,9 +98,9 @@ export function useAuth() {
   useEffect(() => {
     const checkAuth = () => {
       try {
-        const authenticated = sessionStorage.getItem("AUTHENTICATED");
-        const encryptedKey = sessionStorage.getItem("ENCRYPTED_OWNER_KEY");
-        
+        const authenticated = localStorage.getItem("AUTHENTICATED");
+        const encryptedKey = localStorage.getItem("ENCRYPTED_OWNER_KEY");
+
         if (authenticated && encryptedKey) {
           try {
             getContract();
@@ -118,11 +117,11 @@ export function useAuth() {
     };
 
     checkAuth();
-    
+
     // Listen for storage changes (e.g., login/logout in another tab)
     const handleStorageChange = () => checkAuth();
     window.addEventListener("storage", handleStorageChange);
-    
+
     return () => window.removeEventListener("storage", handleStorageChange);
   }, []);
 
@@ -131,7 +130,7 @@ export function useAuth() {
 
 // Utility function to logout
 export function logout() {
-  sessionStorage.removeItem("AUTHENTICATED");
-  sessionStorage.removeItem("ENCRYPTED_OWNER_KEY");
+  localStorage.removeItem("AUTHENTICATED");
+  localStorage.removeItem("ENCRYPTED_OWNER_KEY");
   window.location.href = "/dashboard/keyset-up";
 }

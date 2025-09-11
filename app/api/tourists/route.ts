@@ -1,40 +1,41 @@
-import { NextResponse } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 
-// Mock tourist data
-const generateMockTourists = () => {
-  const tourists = [];
-  const baseLocations = [
-    { lat: 40.7128, lng: -74.006 }, // NYC
-    { lat: 40.7589, lng: -73.9851 }, // Times Square
-    { lat: 40.7505, lng: -73.9934 }, // Herald Square
-    { lat: 40.7614, lng: -73.9776 }, // Central Park
-    { lat: 40.7282, lng: -74.0776 }, // Battery Park
-  ];
+export const dynamic = "force-dynamic";
+export const runtime = "edge";
 
-  for (let i = 0; i < 50; i++) {
-    const baseLocation =
-      baseLocations[Math.floor(Math.random() * baseLocations.length)];
+export async function GET(req: NextRequest) {
+  console.log("[Tourist API] Received GET request");
 
-    tourists.push({
-      id: `tourist-${i + 1}`,
-      latitude: baseLocation.lat + (Math.random() - 0.5) * 0.02,
-      longitude: baseLocation.lng + (Math.random() - 0.5) * 0.02,
-      safetyScore: Math.floor(Math.random() * 10) + 1,
-      timestamp: new Date().toISOString(),
-    });
-  }
-
-  return tourists;
-};
-
-export async function GET() {
   try {
-    const tourists = generateMockTourists();
-    return NextResponse.json(tourists);
+    console.log("[Tourist API] Fetching from stream endpoint...");
+    const streamResponse = await fetch("http://12.10.11.253:8000/stream", {
+      headers: {
+        Accept: "text/event-stream",
+      },
+    });
+
+    console.log("[Tourist API] Stream response status:", streamResponse.status);
+
+    const headers = new Headers({
+      "Content-Type": "text/event-stream",
+      "Cache-Control": "no-cache",
+      Connection: "keep-alive",
+    });
+
+    console.log("[Tourist API] Returning stream response");
+    return new NextResponse(streamResponse.body, {
+      headers,
+    });
   } catch (error) {
-    return NextResponse.json(
-      { error: "Failed to fetch tourists data" },
-      { status: 500 }
+    console.error("[Tourist API] Error:", error);
+    return new NextResponse(
+      JSON.stringify({ error: "Internal Server Error" }),
+      {
+        status: 500,
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
     );
   }
 }
