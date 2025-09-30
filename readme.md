@@ -12,13 +12,14 @@ This repository contains the **Web Dashboard/Admin Portal module** for the Smart
 
 ## How it helps in the problem statement
 
-The problem statement requires real-time monitoring and incident management. The Admin Portal contributes by:
+The problem statement requires real-time monitoring, IoT-enabled tracking, AI-powered analytics, cybersecurity, and incident management. The Admin Portal contributes by:
 
-- **Tourist Management**: Authorities can view detailed profiles of tourists including KYC information, travel history, emergency contacts, and digital IDs. This helps verify identities and track travel behavior.
-- **Incident Monitoring**: Receive alerts from tourists’ mobile apps such as panic button triggers, geo-fencing violations, or unusual behavior, enabling rapid response.
-- **Real-time Visualizations**: Visual dashboards show tourist clusters, heatmaps of high-risk zones, and safety metrics to help authorities understand overall safety conditions.
-- **Blockchain Verification**: Uses Ethereum smart contracts to ensure IDs and incident logs are immutable and tamper-proof.
-- **Dashboard Integration**: Consolidates all information in one interface so police and tourism staff can quickly respond to incidents.
+- **Tourist Management**: Authorities can view detailed profiles of tourists including KYC information, biometric data, GPS-based travel history, emergency contacts, IoT wearables, digital IDs, and verified documents stored securely on the cloud. This helps verify identities, ensure authenticity, and track travel behavior patterns using big data analytics.
+- **Incident Monitoring**: Receive instant alerts from tourists’ mobile apps and IoT devices such as panic button triggers, SOS signals, geo-fencing violations, AI-based suspicious activity detection, anomaly tracking, or unusual behavior, enabling rapid response, law enforcement action, and crisis management through automated workflows.
+- **Real-time Visualizations**: Interactive visual dashboards powered by AI/ML show tourist clusters, live GPS maps, IoT sensor feeds, heatmaps of high-risk zones, safety metrics, predictive analytics, and AI-driven insights to help authorities understand overall safety conditions, forecast risks, and mitigate potential threats.
+- **Blockchain Verification**: Uses Ethereum smart contracts, decentralized ledgers, cryptographic verification, and Web3 integration to ensure IDs, transactions, and incident logs are immutable, transparent, tamper-proof, and resistant to cyberattacks.
+- **Dashboard Integration**: Consolidates all critical information, cloud-based data streams, communication tools, and IoT device feeds in one unified interface so police, emergency responders, cybersecurity teams, and tourism staff can quickly respond to incidents, coordinate actions, and improve operational efficiency with real-time collaboration.
+
 
 ---
 
